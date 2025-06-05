@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Sistem Raport Digital</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    :root {
+      --primary-color: #4e73df;
+      --secondary-color: #858796;
+      --success-color: #1cc88a;
+      --info-color: #36b9cc;
+      --warning-color: #f6c23e;
+      --danger-color: #e74a3b;
+      --light-color: #f8f9fc;
+      --dark-color: #5a5c69;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+    
+    .main-content {
+      margin-left: 280px;
+      padding: 20px;
+      transition: all 0.3s ease;
+      min-height: 100vh;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--light-color);
+    }
+    
+    .card {
+      border: none;
+      border-radius: 0.5rem;
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-header {
+      background-color: #f8f9fc;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      padding: 1rem 1.35rem;
+    }
+    
+    .table-responsive {
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    
+    .table {
+      margin-bottom: 0;
+    }
+    
+    .table th {
+      background-color: #f8f9fc;
+      font-weight: 600;
+      color: var(--dark-color);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      padding: 1rem;
+    }
+    
+    .table td {
+      padding: 0.75rem 1rem;
+      vertical-align: middle;
+      border-top: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .kktp-badge {
+      background-color: #e9f7fe;
+      color: var(--primary-color);
+      padding: 0.35rem 0.65rem;
+      border-radius: 0.25rem;
+      font-weight: 600;
+      font-size: 0.75rem;
+      display: inline-block;
+    }
+    
+    .action-buttons .btn {
+      padding: 0.375rem 0.75rem;
+      border-radius: 0.35rem;
+      transition: all 0.2s ease;
+    }
+    
+    .search-box {
+      max-width: 300px;
+    }
+    
+    .subject-header {
+      background-color: rgba(78, 115, 223, 0.05) !important;
+    }
+    
+    .subject-header td {
+      padding: 0.75rem 1rem !important;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+    
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1100;
+    }
+    
+    .toast {
+      border-radius: 0.35rem;
+      box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.2);
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-primary:hover {
+      background-color: #3a5bd9;
+      border-color: #3a5bd9;
+    }
+    
+    .btn-outline-primary {
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-outline-primary:hover {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-success {
+      background-color: var(--success-color);
+      border-color: var(--success-color);
+    }
+    
+    .btn-danger {
+      background-color: var(--danger-color);
+      border-color: var(--danger-color);
+    }
+    
+    .modal-header {
+      padding: 1rem 1.5rem;
+    }
+    
+    .modal-footer {
+      padding: 1rem 1.5rem;
+    }
+    
+    .form-control, .form-select {
+      border-radius: 0.35rem;
+      padding: 0.5rem 0.75rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+    
+    .invalid-feedback {
+      font-size: 0.85rem;
+    }
+    
+    .spinner-border {
+      width: 1.5rem;
+      height: 1.5rem;
+      border-width: 0.2em;
+    }
+    
+    @media (max-width: 992px) {
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      
+      .search-box {
+        max-width: 100%;
+        width: 100%;
+      }
+    }
+    
+    /* Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.3s ease forwards;
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+  </style>
+</head>
+<body>
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <!-- Header Section -->
+    <header class="header fade-in">
+      <h4 id="content-title" class="fw-bold text-dark">Dashboard</h4>
+      <div class="user-info">
+        <img src="https://res.cloudinary.com/di10axon3/image/upload/v1747889808/DSC_4881_tnwbnj.jpg" 
+             alt="User Avatar" 
+             class="user-avatar shadow-sm">
+        <div>
+          <div id="user-name" class="fw-semibold">Memuat...</div>
+          <small id="user-role" class="text-muted">Memuat...</small>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Content -->
+    <div class="container-fluid px-0">
+      <!-- Page Heading -->
+      <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+          <h1 class="h3 mb-2 text-gray-800 fw-bold">Deskripsi Pembelajaran</h1>
+          <p class="mb-0 text-muted">Kelola deskripsi dan lingkup materi pembelajaran</p>
+        </div>
+        <div>
+          <button class="btn btn-primary me-2 shadow-sm" onclick="showAddModal()">
+            <i class="fas fa-plus me-2"></i> Tambah Deskripsi
+          </button>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex flex-column flex-md-row justify-content-between align-items-center">
+          <h6 class="m-0 font-weight-bold text-primary mb-2 mb-md-0">
+            <i class="fas fa-book-open me-2"></i>Daftar Deskripsi Pembelajaran
+          </h6>
+          <div class="input-group search-box shadow-sm">
+            <input type="text" id="searchInput" class="form-control" placeholder="Cari deskripsi...">
+            <button class="btn btn-outline-secondary" type="button" onclick="filterData()">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th width="8%">No</th>
+                  <th width="25%">Mata Pelajaran</th>
+                  <th width="12%">KKTP</th>
+                  <th>Deskripsi/Lingkup Materi</th>
+                  <th width="12%">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="dataTable">
+                <tr>
+                  <td colspan="5" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Memuat data...</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card-footer bg-white d-flex flex-column flex-md-row justify-content-between align-items-center border-top">
+          <div class="text-muted mb-2 mb-md-0" id="itemCount">Memuat data...</div>
+          <div>
+            <button class="btn btn-success shadow-sm" onclick="saveAllChanges()" id="saveAllBtn">
+              <i class="fas fa-save me-2"></i> Simpan Perubahan
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div class="modal fade" id="descriptionModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="modalTitle">Tambah Deskripsi Pembelajaran</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="descriptionForm" class="needs-validation" novalidate>
+            <input type="hidden" id="editId">
+            
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label for="modalSubject" class="form-label fw-semibold">
+                  Mata Pelajaran <span class="text-danger">*</span>
+                </label>
+                <select class="form-select shadow-sm" id="modalSubject" required>
+                  <option value="" selected disabled>-- Pilih Mata Pelajaran --</option>
+                </select>
+                <div class="invalid-feedback">Harap pilih mata pelajaran</div>
+              </div>
+              
+              <div class="col-md-6">
+                <label for="kktpCode" class="form-label fw-semibold">
+                  KKTP <span class="text-danger">*</span>
+                </label>
+                <div class="input-group shadow-sm">
+                  <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+                  <input type="text" class="form-control" id="kktpCode" required 
+                         placeholder="Contoh: 3.1, 4.2" pattern="[0-9.]{1,10}">
+                </div>
+                <div class="invalid-feedback">Format KKTP tidak valid (contoh: 3.1, 4.2)</div>
+              </div>
+            </div>
+            
+            <div class="mb-4">
+              <label for="descriptionText" class="form-label fw-semibold">
+                Deskripsi/Lingkup Materi <span class="text-danger">*</span>
+              </label>
+              <textarea class="form-control shadow-sm" id="descriptionText" rows="5" required
+                        placeholder="Tuliskan deskripsi lengkap tentang lingkup materi pembelajaran"></textarea>
+              <div class="invalid-feedback">Deskripsi pembelajaran harus diisi</div>
+              <div class="form-text text-muted">Maksimal 5 lingkup materi per mata pelajaran</div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer border-top-0 bg-light">
+          <button type="button" class="btn btn-outline-secondary shadow-sm" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i> Batal
+          </button>
+          <button type="button" class="btn btn-primary shadow-sm" id="saveBtn" onclick="saveDescription()">
+            <span id="saveBtnText"><i class="fas fa-save me-1"></i> Simpan</span>
+            <span id="saveBtnSpinner" class="spinner-border spinner-border-sm d-none ms-1"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title">Konfirmasi Penghapusan</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Anda yakin ingin menghapus deskripsi pembelajaran ini?</p>
+          <div class="alert alert-warning p-3 mb-0 shadow-sm">
+            <strong id="deleteKktpCode"></strong>
+            <p id="deleteDescriptionPreview" class="mb-0 mt-2"></p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary shadow-sm" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i> Batal
+          </button>
+          <button type="button" class="btn btn-danger shadow-sm" id="confirmDeleteBtn">
+            <i class="fas fa-trash-alt me-1"></i> Hapus
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Required Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script>
+    // Global variables
+    let descriptions = [];
+    let subjects = [];
+    let descriptionModal = null;
+    let deleteModal = null;
+    let pendingDeleteId = null;
+    let editedData = {};
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    const SPREADSHEET_ID = '175ZFDxLZ-cQAjm7l9tYj-ycMZQDi2hjdKxbIg_Evkww';
+    const SHEET_NAME = 'Deskripsi';
+
+    // Initialize when DOM is loaded
+    $(document).ready(function() {
+      // Initialize modals
+      descriptionModal = new bootstrap.Modal(document.getElementById('descriptionModal'));
+      deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+      
+      // Setup delete confirmation handler
+      $('#confirmDeleteBtn').click(function() {
+        if (pendingDeleteId) {
+          deleteDescription(pendingDeleteId);
+        }
+      });
+      
+      // Enable search on Enter key
+      $('#searchInput').keypress(function(e) {
+        if (e.which === 13) {
+          filterData();
+        }
+      });
+      
+      // Load initial data
+      loadData();
+      
+      // Load user info
+      loadUserInfo();
+    });
+
+    // Load user information
+    function loadUserInfo() {
+      google.script.run
+        .withSuccessHandler(function(user) {
+          document.getElementById('user-name').textContent = user.name || 'Admin Sekolah';
+          document.getElementById('user-role').textContent = user.role || 'Administrator';
+        })
+        .withFailureHandler(function() {
+          document.getElementById('user-name').textContent = 'Admin Sekolah';
+          document.getElementById('user-role').textContent = 'Administrator';
+        })
+        .getUserInfo();
+    }
+
+    // Load all data from Google Sheet
+    function loadData() {
+      showLoading(true);
+      
+      // Reset previous data
+      descriptions = [];
+      subjects = [];
+      
+      google.script.run
+        .withSuccessHandler(function(data) {
+          if (!data || !data.descriptions) {
+            throw new Error("Format data tidak valid");
+          }
+          
+          descriptions = data.descriptions || [];
+          subjects = data.subjects || [];
+          
+          renderTable();
+          updateItemCount(descriptions.length);
+        })
+        .withFailureHandler(function(error) {
+          console.error("Error loading data:", error);
+          showError('Gagal memuat data: ' + (error.message || 'Unknown error'), true);
+        })
+        .getDataFromSheet(SPREADSHEET_ID, SHEET_NAME)
+        .finally(() => {
+          showLoading(false);
+        });
+    }
+
+    // Show error message in table
+    function showError(message, isRetryable = true) {
+      const tableBody = document.getElementById('dataTable');
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="5">
+            <div class="alert alert-danger m-3 shadow-sm">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              ${message}
+              ${isRetryable ? `
+                <button class="btn btn-sm btn-outline-secondary mt-2 shadow-sm" onclick="loadData()">
+                  <i class="fas fa-sync-alt me-1"></i> Coba Lagi
+                </button>
+              ` : ''}
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+
+    // Render data table
+    function renderTable() {
+      const tableBody = document.getElementById('dataTable');
+      
+      if (descriptions.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="5" class="text-center py-5">
+              <i class="fas fa-book-open fa-2x text-muted mb-3"></i>
+              <p class="text-muted">Tidak ada data deskripsi pembelajaran</p>
+              <button class="btn btn-primary shadow-sm" onclick="showAddModal()">
+                <i class="fas fa-plus me-2"></i> Tambah Deskripsi
+              </button>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      // Group descriptions by subject
+      const grouped = descriptions.reduce((acc, desc) => {
+        if (!acc[desc.subjectCode]) {
+          acc[desc.subjectCode] = [];
+        }
+        acc[desc.subjectCode].push(desc);
+        return acc;
+      }, {});
+
+      // Clear table first
+      tableBody.innerHTML = '';
+
+      // Render each subject group
+      Object.keys(grouped).forEach(subjectCode => {
+        const subject = subjects.find(s => s.kode === subjectCode) || { nama: subjectCode };
+        const subjectDescs = grouped[subjectCode];
+
+        // Subject header row
+        const headerRow = document.createElement('tr');
+        headerRow.className = 'subject-header';
+        headerRow.innerHTML = `
+          <td colspan="5">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="fw-semibold">${subject.nama}</span>
+              <button class="btn btn-sm btn-outline-primary shadow-sm" onclick="addDescriptionForSubject('${subjectCode}')">
+                <i class="fas fa-plus me-1"></i> Tambah KKTP
+              </button>
+            </div>
+          </td>
+        `;
+        tableBody.appendChild(headerRow);
+
+        // Description rows
+        subjectDescs.forEach((desc, index) => {
+          const row = document.createElement('tr');
+          row.className = 'fade-in';
+          row.innerHTML = `
+            <td>${desc.no || index + 1}</td>
+            <td class="text-muted" style="font-style: italic;">${index === 0 ? subject.nama : ''}</td>
+            <td><span class="kktp-badge">${desc.kktp}</span></td>
+            <td>${desc.deskripsi}</td>
+            <td class="action-buttons">
+              <button class="btn btn-sm btn-outline-primary shadow-sm" onclick="editDescription('${desc.id}')"
+                      data-bs-toggle="tooltip" title="Edit">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger shadow-sm" onclick="confirmDelete('${desc.id}')"
+                      data-bs-toggle="tooltip" title="Hapus">
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      });
+
+      // Initialize tooltips
+      $('[data-bs-toggle="tooltip"]').tooltip();
+    }
+
+    // Show add modal
+    function showAddModal() {
+      // Reset form
+      document.getElementById('modalTitle').textContent = 'Tambah Deskripsi Pembelajaran';
+      document.getElementById('editId').value = '';
+      document.getElementById('descriptionForm').reset();
+      document.getElementById('descriptionForm').classList.remove('was-validated');
+      
+      // Show loading in subject dropdown
+      const select = document.getElementById('modalSubject');
+      select.innerHTML = '<option value="" selected disabled>Memuat mata pelajaran...</option>';
+      
+      // Show modal immediately
+      descriptionModal.show();
+      
+      // Load subjects data
+      google.script.run
+        .withSuccessHandler(function(subjects) {
+          select.innerHTML = '<option value="" selected disabled>-- Pilih Mata Pelajaran --</option>';
+          
+          if (subjects.length === 0) {
+            select.innerHTML = '<option value="" selected disabled>Tidak ada mata pelajaran tersedia</option>';
+            return;
+          }
+          
+          subjects.forEach(function(subject) {
+            const option = document.createElement('option');
+            option.value = subject.kode;
+            option.textContent = subject.kode + ' - ' + subject.nama;
+            select.appendChild(option);
+          });
+          
+          // Focus first field after data loaded
+          setTimeout(() => {
+            select.focus();
+          }, 300);
+        })
+        .withFailureHandler(function(error) {
+          console.error("Error loading subjects:", error);
+          select.innerHTML = '<option value="" selected disabled>Gagal memuat mata pelajaran</option>';
+          showToast('danger', 'Gagal memuat daftar mata pelajaran');
+        })
+        .getSubjectsFromSheet(SPREADSHEET_ID, SHEET_NAME);
+    }
+
+    // Add description for specific subject
+    function addDescriptionForSubject(subjectCode) {
+      showAddModal();
+      setTimeout(() => {
+        const select = document.getElementById('modalSubject');
+        select.value = subjectCode;
+        select.dispatchEvent(new Event('change'));
+        document.getElementById('kktpCode').focus();
+      }, 300);
+    }
+
+    // Edit description
+    function editDescription(id) {
+      const desc = descriptions.find(d => d.id === id);
+      
+      if (!desc) {
+        showToast('warning', 'Deskripsi tidak ditemukan');
+        return;
+      }
+      
+      document.getElementById('modalTitle').textContent = 'Edit Deskripsi Pembelajaran';
+      document.getElementById('editId').value = desc.id;
+      document.getElementById('kktpCode').value = desc.kktp;
+      document.getElementById('descriptionText').value = desc.deskripsi;
+      
+      const select = document.getElementById('modalSubject');
+      select.innerHTML = '';
+      
+      const defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = '-- Pilih Mata Pelajaran --';
+      defaultOption.disabled = true;
+      select.appendChild(defaultOption);
+      
+      subjects.forEach(subject => {
+        const option = document.createElement('option');
+        option.value = subject.kode;
+        option.textContent = subject.kode + ' - ' + subject.nama;
+        option.selected = (subject.kode === desc.subjectCode);
+        select.appendChild(option);
+      });
+      
+      select.required = true;
+      
+      document.getElementById('descriptionForm').classList.remove('was-validated');
+      descriptionModal.show();
+    }
+
+    // Save description to Google Sheet
+    function saveDescription() {
+      const form = document.getElementById('descriptionForm');
+      form.classList.add('was-validated');
+      
+      if (!form.checkValidity()) {
+        return;
+      }
+
+      const btn = document.getElementById('saveBtn');
+      const btnText = document.getElementById('saveBtnText');
+      const spinner = document.getElementById('saveBtnSpinner');
+      
+      btn.disabled = true;
+      btnText.innerHTML = 'Menyimpan...';
+      spinner.classList.remove('d-none');
+
+      const descriptionData = {
+        id: document.getElementById('editId').value,
+        subjectCode: document.getElementById('modalSubject').value,
+        kktp: document.getElementById('kktpCode').value,
+        deskripsi: document.getElementById('descriptionText').value
+      };
+
+      const action = descriptionData.id 
+        ? google.script.run.updateDescriptionInSheet(descriptionData, SPREADSHEET_ID, SHEET_NAME)
+        : google.script.run.addDescriptionToSheet(descriptionData, SPREADSHEET_ID, SHEET_NAME);
+
+      action
+        .withSuccessHandler(() => {
+          showToast('success', 'Data berhasil disimpan');
+          descriptionModal.hide();
+          loadData();
+        })
+        .withFailureHandler(error => {
+          showToast('danger', error.message || 'Gagal menyimpan data');
+        })
+        .finally(() => {
+          btn.disabled = false;
+          btnText.innerHTML = '<i class="fas fa-save me-1"></i> Simpan';
+          spinner.classList.add('d-none');
+        });
+    }
+
+    // Confirm delete
+    function confirmDelete(id) {
+      const desc = descriptions.find(d => d.id === id);
+      
+      if (!desc) {
+        showToast('warning', 'Deskripsi tidak ditemukan');
+        return;
+      }
+      
+      pendingDeleteId = id;
+      document.getElementById('deleteKktpCode').textContent = `KKTP: ${desc.kktp}`;
+      document.getElementById('deleteDescriptionPreview').textContent = 
+        desc.deskripsi.length > 100 
+          ? desc.deskripsi.substring(0, 100) + '...' 
+          : desc.deskripsi;
+      
+      deleteModal.show();
+    }
+
+    // Delete description from Google Sheet
+    function deleteDescription(id) {
+      deleteModal.hide();
+      showLoading(true);
+      
+      google.script.run
+        .withSuccessHandler(() => {
+          showToast('success', 'Deskripsi berhasil dihapus');
+          descriptions = descriptions.filter(d => d.id !== id);
+          renderTable();
+          updateItemCount(descriptions.length);
+        })
+        .withFailureHandler(error => {
+          console.error('Error deleting description:', error);
+          showToast('danger', error.message || 'Gagal menghapus deskripsi');
+          showLoading(false);
+        })
+        .deleteDescriptionFromSheet(id, SPREADSHEET_ID, SHEET_NAME);
+    }
+
+    // Save all changes to Google Sheet
+    function saveAllChanges() {
+      if (Object.keys(editedData).length === 0) {
+        showToast('info', 'Tidak ada perubahan yang perlu disimpan');
+        return;
+      }
+      
+      const btn = document.getElementById('saveAllBtn');
+      const originalText = btn.innerHTML;
+      
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Menyimpan...';
+      
+      showLoading(true);
+      
+      const updates = Object.values(editedData);
+      google.script.run
+        .withSuccessHandler(() => {
+          showToast('success', 'Semua perubahan berhasil disimpan');
+          editedData = {};
+          loadData();
+        })
+        .withFailureHandler(error => {
+          console.error('Error saving changes:', error);
+          showToast('danger', error.message || 'Gagal menyimpan perubahan');
+          showLoading(false);
+          
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+        })
+        .updateMultipleDescriptionsInSheet(updates, SPREADSHEET_ID, SHEET_NAME);
+    }
+
+    // Filter data
+    function filterData() {
+      const searchTerm = $('#searchInput').val().toLowerCase().trim();
+      if (!searchTerm) {
+        $('tbody tr').show();
+        return;
+      }
+      
+      $('tbody tr').each(function() {
+        const rowText = $(this).text().toLowerCase();
+        $(this).toggle(rowText.includes(searchTerm));
+      });
+    }
+
+    // Show loading state
+    function showLoading(show) {
+      const tableBody = document.getElementById('dataTable');
+      if (show) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="5" class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2 text-muted">Memuat data...</p>
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    // Show toast notification
+    function showToast(type, message) {
+      const toastContainer = document.getElementById('toastContainer');
+      const toastId = 'toast-' + Date.now();
+      
+      const toast = document.createElement('div');
+      toast.className = `toast show align-items-center text-white bg-${type} border-0 mb-2 fade-in`;
+      toast.role = 'alert';
+      toast.id = toastId;
+      toast.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 
+                           type === 'danger' ? 'fa-exclamation-circle' : 
+                           type === 'warning' ? 'fa-exclamation-triangle' : 
+                           'fa-info-circle'} me-2"></i>
+            ${message}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      `;
+      
+      toastContainer.appendChild(toast);
+      
+      setTimeout(() => {
+        const bsToast = bootstrap.Toast.getOrCreateInstance(document.getElementById(toastId));
+        bsToast.hide();
+        toast.addEventListener('hidden.bs.toast', () => toast.remove());
+      }, 5000);
+    }
+
+    // Update item count
+    function updateItemCount(count) {
+      document.getElementById('itemCount').textContent = `Total ${count} deskripsi pembelajaran`;
+    }
+  </script>
+</body>
+</html>
