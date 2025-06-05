@@ -1,0 +1,220 @@
+<!-- Professional Sidebar Navigation -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <div class="brand-logo">
+        <i class="fas fa-school"></i>
+      </div>
+      <div class="brand-name">RAPORT DIGITAL</div>
+      <div class="brand-subtitle">SD INPRES ENDE 15</div>
+    </div>
+  </div>
+  
+  <div class="sidebar-menu">
+    <div class="menu-section">
+      <div class="menu-section-title">Menu Utama</div>
+      <div class="menu-item" onclick="navigateToPage('dashboard')">
+        <div class="menu-icon">
+          <i class="fas fa-tachometer-alt"></i>
+        </div>
+        <span>Dashboard</span>
+      </div>
+      
+      <div class="menu-item" onclick="navigateToPage('data-siswa')">
+        <div class="menu-icon">
+          <i class="fas fa-users"></i>
+        </div>
+        <span>Data Siswa</span>
+      </div>
+      
+      <div class="menu-item" onclick="navigateToPage('data-mapel')">
+        <div class="menu-icon">
+          <i class="fas fa-book"></i>
+        </div>
+        <span>Mata Pelajaran</span>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-title">Penilaian</div>
+      <div class="menu-item" onclick="navigateToPage('input-nilai')">
+        <div class="menu-icon">
+          <i class="fas fa-edit"></i>
+        </div>
+        <span>Input Nilai</span>
+      </div>
+
+<div class="menu-item" onclick="navigateToPage('non-akademik')">
+        <div class="menu-icon">
+          <i class="fas fa-book"></i>
+        </div>
+        <span>Non Akademik</span>
+      </div>
+
+      <div class="menu-item" onclick="navigateToPage('deskripsi')">
+        <div class="menu-icon">
+          <i class="fas fa-comment-alt"></i>
+        </div>
+        <span>Deskripsi</span>
+      </div>
+      
+      <div class="menu-item" onclick="navigateToPage('nilai')">
+        <div class="menu-icon">
+          <i class="fas fa-star"></i>
+        </div>
+        <span>Nilai Siswa</span>
+      </div>
+    </div>
+    
+    <div class="menu-section">
+      <div class="menu-section-title">Hasil Belajar</div>
+      <div class="menu-item" onclick="navigateToPage('raport')">
+        <div class="menu-icon">
+          <i class="fas fa-file-alt"></i>
+        </div>
+        <span>Raport</span>
+      </div>
+      
+      <div class="menu-item" onclick="navigateToPage('rank')">
+        <div class="menu-icon">
+          <i class="fas fa-trophy"></i>
+        </div>
+        <span>Ranking</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="sidebar-footer">
+    <div class="user-profile" onclick="navigateToPage('profile')">
+      <img src="https://res.cloudinary.com/di10axon3/image/upload/v1747889808/DSC_4881_tnwbnj.jpg" 
+     alt="User Avatar" 
+     class="user-avatar" />
+      <div class="user-details">
+        <div class="user-name" id="sidebar-user-name">Admin</div>
+        <div class="user-role" id="sidebar-user-role">Administrator</div>
+      </div>
+      <div class="user-logout" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Fungsi untuk navigasi antar halaman
+  function navigateToPage(page) {
+    try {
+      // Remove active class from all menu items first
+      document.querySelectorAll('.menu-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      // Add active class to clicked menu item
+      event.currentTarget.classList.add('active');
+      
+      // Navigate to page
+      google.script.run
+        .withSuccessHandler(function(url) {
+          window.top.location.href = url;
+        })
+        .withFailureHandler(function(error) {
+          console.error('Navigation error:', error);
+          alert('Gagal berpindah halaman: ' + error.message);
+        })
+        .navigateToPage(page);
+    } catch (e) {
+      console.error('Error in navigateToPage:', e);
+      alert('Terjadi kesalahan saat berpindah halaman');
+    }
+  }
+
+  // Fungsi untuk logout
+  function logout() {
+    event.stopPropagation(); // Prevent profile click event
+    if (confirm('Apakah Anda yakin ingin keluar?')) {
+      google.script.run
+        .withSuccessHandler(function() {
+          window.top.location.href = window.top.location.href; // Reload to show login page
+        })
+        .withFailureHandler(function(error) {
+          console.error('Logout error:', error);
+          alert('Gagal logout: ' + error.message);
+        })
+        .logoutUser();
+    }
+  }
+
+  // Fungsi untuk memuat data pengguna di sidebar
+  function loadSidebarUserData() {
+    google.script.run
+      .withSuccessHandler(function(user) {
+        const userNameElement = document.getElementById('sidebar-user-name');
+        const userRoleElement = document.getElementById('sidebar-user-role');
+        const avatar = document.querySelector('.user-avatar');
+        
+        // Set user name and role
+        userNameElement.textContent = user.name || 'Pengguna';
+        userRoleElement.textContent = user.role || 'Pengguna';
+        
+        // Update avatar
+        if (user.name) {
+          avatar.innerHTML = user.name.charAt(0).toUpperCase();
+          avatar.style.display = 'flex';
+          avatar.style.alignItems = 'center';
+          avatar.style.justifyContent = 'center';
+        }
+        if (user.avatarColor) {
+          avatar.style.background = user.avatarColor;
+        }
+        
+        // Set avatar image if available
+        if (user.avatarUrl) {
+          avatar.innerHTML = '';
+          avatar.style.backgroundImage = `url('${user.avatarUrl}')`;
+          avatar.style.backgroundSize = 'cover';
+          avatar.style.backgroundPosition = 'center';
+        }
+      })
+      .withFailureHandler(function(error) {
+        console.error('Error loading user data:', error);
+      })
+      .getCurrentUser();
+  }
+
+  // Highlight menu aktif berdasarkan halaman saat ini
+  function setActiveMenu() {
+    const path = window.location.pathname.split('/').pop() || '';
+    const page = path.replace('.html', '').toLowerCase();
+    
+    document.querySelectorAll('.menu-item').forEach(item => {
+      item.classList.remove('active');
+    });
+    
+    const activeItem = document.querySelector(`.menu-item[onclick*="${page}"]`);
+    if (activeItem) {
+      activeItem.classList.add('active');
+    } else {
+      // Default ke dashboard jika tidak ditemukan
+      const dashboardItem = document.querySelector(`.menu-item[onclick*="dashboard"]`);
+      if (dashboardItem) dashboardItem.classList.add('active');
+    }
+  }
+
+  // Inisialisasi sidebar saat dokumen siap
+  document.addEventListener('DOMContentLoaded', function() {
+    loadSidebarUserData();
+    setActiveMenu();
+    
+    // Tambahkan smooth transition saat hover menu item
+    const menuItems = document.querySelectorAll('.menu-item');
+    menuItems.forEach(item => {
+      item.addEventListener('mouseenter', function() {
+        this.style.transition = 'all 0.3s ease';
+        this.style.transform = 'translateX(5px)';
+      });
+      item.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateX(0)';
+      });
+    });
+  });
+</script>
