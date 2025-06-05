@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Ranking - Sistem Raport Digital</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- PDF Export Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <!-- Excel Export Library -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+  <!-- Include CSS File -->
+  <?!= include('css'); ?>
+</head>
+<body>
+  <!-- Include Sidebar -->
+  <?!= include('sidebar'); ?>
+
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <!-- Header Section -->
+    <header class="header fade-in">
+      <h4 id="content-title">Data Ranking</h4>
+      <div class="user-info">
+        <img src="https://res.cloudinary.com/di10axon3/image/upload/v1747889808/DSC_4881_tnwbnj.jpg" 
+        alt="User Avatar" 
+        class="user-avatar" />
+          <div>
+          <div id="user-name">Admin</div>
+          <small id="user-role" class="text-muted">Markus paru</small>
+        </div>
+    </header>
+
+    <!-- Content -->
+    <div class="container-fluid">
+  <div class="container-fluid mt-3">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h5 class="m-0 font-weight-bold text-primary">SISTEM RANKING KELAS</h5>
+        <div>
+          <select id="kelasSelect" class="form-select me-2 d-inline-block" style="width:150px">
+            <option value="">Pilih Kelas</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+          <select id="semesterSelect" class="form-select me-2 d-inline-block" style="width:150px">
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+          </select>
+          <button id="refreshBtn" class="btn btn-primary">
+            <i class="fas fa-sync-alt"></i> Muat Data
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <!-- Top 3 Ranking -->
+        <div class="row mb-4" id="topRankingContainer">
+          <!-- Template akan diisi oleh JavaScript -->
+        </div>
+        
+        <!-- Full Ranking Table -->
+        <div class="table-responsive scrollable-table">
+          <table class="table table-bordered table-hover">
+            <thead class="table-light">
+              <tr>
+                <th width="5%">Rank</th>
+                <th width="10%">NISN</th>
+                <th>Nama Siswa</th>
+                <th width="15%">Nilai Rata-rata</th>
+                <th width="15%">Predikat</th>
+                <th width="15%">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="rankingTableBody">
+              <tr>
+                <td colspan="6" class="text-center py-4">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <p class="mt-2">Memuat data ranking...</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Detail Siswa -->
+  <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Detail Siswa</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="detailModalContent">
+          <!-- Konten akan diisi oleh JavaScript -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+          <button type="button" class="btn btn-primary" id="printBtn">
+            <i class="fas fa-print"></i> Cetak Raport
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  
+  <script>
+    // Global variables
+    let currentRankings = [];
+    let detailModal = null;
+    
+    $(document).ready(function() {
+      // Initialize modal
+      detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
+      
+      // Load data when button clicked
+      $('#refreshBtn').click(loadRankings);
+      
+      // Set default semester based on current month
+      const currentMonth = new Date().getMonth() + 1;
+      $('#semesterSelect').val(currentMonth >= 7 ? 1 : 2);
+    });
+    
+    // Main function to load rankings
+    function loadRankings() {
+      const kelas = $('#kelasSelect').val();
+      const semester = $('#semesterSelect').val();
+      
+      if (!kelas) {
+        showAlert('Silakan pilih kelas terlebih dahulu', 'warning');
+        return;
+      }
+      
+      showLoading(true);
+      
+      google.script.run
+        .withSuccessHandler(function(data) {
+          currentRankings = data;
+          renderTopRankings();
+          renderRankingTable();
+          showLoading(false);
+        })
+        .withFailureHandler(function(error) {
+          console.error("Error:", error);
+          showAlert('Gagal memuat data: ' + error.message, 'danger');
+          showLoading(false);
+        })
+        .getClassRankings(kelas, semester);
+    }
+    
+    // Render top 3 ranking cards
+    function renderTopRankings() {
+      const container = $('#topRankingContainer');
+      container.empty();
+      
+      if (currentRankings.length === 0) {
+        container.html('<div class="col-12 text-center text-muted">Tidak ada data ranking</div>');
+        return;
+      }
+      
+      // Create cards for top 3
+      for (let i = 0; i < Math.min(3, currentRankings.length); i++) {
+        const student = currentRankings[i];
+        const rank = i + 1;
+        
+        let medalClass = '';
+        if (rank === 1) medalClass = 'gold';
+        else if (rank === 2) medalClass = 'silver';
+        else if (rank === 3) medalClass = 'bronze';
+        
+        container.append(`
+          <div class="col-md-4 mb-4">
+            <div class="card ranking-card rank-${rank} h-100">
+              <div class="card-body text-center">
+                <div class="medal ${medalClass}">
+                  <i class="fas fa-trophy"></i>
+                </div>
+                <h3>Juara ${rank}</h3>
+                <h4 class="my-2">${student.NAMA_SISWA || '-'}</h4>
+                <div class="text-muted">Nama: ${student.NISN || '-'}</div>
+                <div class="mt-3">
+                  <span class="badge bg-primary">Nilai: ${student.NILAI_RAPORT?.toFixed(2) || '0.00'}</span>
+                  <span class="badge bg-success ms-2">Predikat: ${student.PREDIKAT || '-'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `);
+      }
+    }
+    
+    // Render full ranking table
+    function renderRankingTable() {
+      const tbody = $('#rankingTableBody');
+      tbody.empty();
+      
+      if (currentRankings.length === 0) {
+        tbody.html('<tr><td colspan="6" class="text-center py-4 text-muted">Tidak ada data ranking</td></tr>');
+        return;
+      }
+      
+      currentRankings.forEach((student, index) => {
+        const rank = index + 1;
+        tbody.append(`
+          <tr>
+            <td class="text-center">
+              <span class="badge ${rank <= 3 ? 'bg-warning text-dark' : 'bg-light text-dark'}">
+                ${rank}
+              </span>
+            </td>
+            <td>${student.NISN || '-'}</td>
+            <td>${student.NAMA_SISWA || '-'}</td>
+            <td class="text-center">${student.NILAI_RAPORT?.toFixed(2) || '0.00'}</td>
+            <td class="text-center">${student.PREDIKAT || '-'}</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-primary" onclick="showStudentDetail('${student.NISN}')">
+                <i class="fas fa-eye"></i> Detail
+              </button>
+            </td>
+          </tr>
+        `);
+      });
+    }
+    
+    // Show student detail modal
+    function showStudentDetail(nisn) {
+      const student = currentRankings.find(s => s.NISN === nisn);
+      if (!student) return;
+      
+      $('#detailModalContent').html(`
+        <div class="row">
+          <div class="col-md-4 text-center">
+            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(student.NAMA_SISWA)}&background=random" 
+                 class="img-thumbnail mb-3" 
+                 style="width:150px;height:150px;object-fit:cover;">
+            <h4>${student.NAMA_SISWA || '-'}</h4>
+            <p class="text-muted">NISN: ${student.NISN || '-'}</p>
+            <h5>
+              <span class="badge bg-primary">
+                Ranking: ${student.Rank || '-'}
+              </span>
+            </h5>
+          </div>
+          <div class="col-md-8">
+            <div class="card mb-3">
+              <div class="card-header bg-light">
+                <h5 class="mb-0">Informasi Nilai</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <p><strong>Nilai Rata-rata:</strong> ${student.NILAI_RAPORT?.toFixed(2) || '0.00'}</p>
+                    <p><strong>Predikat:</strong> ${student.PREDIKAT || '-'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `);
+      
+      detailModal.show();
+    }
+    
+    // Helper functions
+    function showLoading(show) {
+      if (show) {
+        $('#rankingTableBody').html(`
+          <tr>
+            <td colspan="6" class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2">Memuat data ranking...</p>
+            </td>
+          </tr>
+        `);
+      }
+    }
+    
+    function showAlert(message, type) {
+      const alert = $(`
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+          ${message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      `);
+      
+      $('.container-fluid').prepend(alert);
+      
+      setTimeout(() => {
+        alert.alert('close');
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
