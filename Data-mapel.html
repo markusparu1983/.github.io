@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mata Pelajaran - Sistem Raport Digital</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Include CSS File -->
+  <?!= include('css'); ?>
+</head>
+<body>
+  <!-- Include Sidebar -->
+  <?!= include('sidebar'); ?>
+
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <!-- Header Section -->
+    <header class="header fade-in">
+      <h4 id="content-title">Mata Pelajaran</h4>
+      <div class="user-info">
+        <img src="https://res.cloudinary.com/di10axon3/image/upload/v1747889808/DSC_4881_tnwbnj.jpg" 
+        alt="User Avatar" 
+        class="user-avatar" />
+      <div>
+          <div id="user-name">Admin</div>
+          <small id="user-role" class="text-muted">Markus Paru</small>
+        </div>
+    </header>
+        <!-- Content -->
+      <div class="container-fluid">
+          <!-- Page Heading -->
+          <div class="d-sm-flex align-items-center justify-content-between mb-4">
+              <button class="btn btn-primary" onclick="showAddModal()">
+                  <i class="fas fa-plus me-1"></i> Tambah Mapel
+              </button>
+          </div>
+      </div>
+
+            <!-- Data Table -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Daftar Mata Pelajaran</h6>
+                    <div class="input-group" style="width: 300px;">
+                        <input type="text" id="search-input" class="form-control" placeholder="Cari...">
+                        <button class="btn btn-outline-secondary" type="button" onclick="refreshData()">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="subjectsTable" class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th width="5%">No</th>
+                                    <th width="15%">Kode</th>
+                                    <th>Mata Pelajaran</th>
+                                    <th width="15%">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="modal fade" id="subjectModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalTitle">Tambah Mata Pelajaran</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="subjectForm" novalidate>
+                        <div class="mb-3">
+                            <label for="kodeMapel" class="form-label">Kode Mapel <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="kodeMapel" required 
+                                   pattern="[A-Z0-9]{3,10}" maxlength="10"
+                                   placeholder="Contoh: P-00001, P-00002, P-00003">
+                            <div class="invalid-feedback">Kode harus 3-10 karakter (huruf/angka)</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="namaMapel" class="form-label">Nama Mata Pelajaran <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="namaMapel" required minlength="3" maxlength="100"
+                                   placeholder="Contoh: Matematika Dasar">
+                            <div class="invalid-feedback">Nama minimal 3 karakter</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Batal
+                    </button>
+                    <button type="button" class="btn btn-primary" id="saveBtn" onclick="saveSubject()">
+                        <span id="saveBtnText"><i class="fas fa-save me-1"></i> Simpan</span>
+                        <span id="saveBtnSpinner" class="spinner-border spinner-border-sm d-none"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Konfirmasi Penghapusan</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger mb-0">
+                        <h5><i class="fas fa-exclamation-triangle me-2"></i> Apakah Anda yakin?</h5>
+                        <p class="mb-2">Anda akan menghapus mata pelajaran berikut:</p>
+                        <ul class="list-unstyled">
+                            <li><strong>Kode:</strong> <span id="deleteKode"></span></li>
+                            <li><strong>Nama:</strong> <span id="deleteNama"></span></li>
+                        </ul>
+                        <p class="mt-2 mb-0"><strong>Perhatian:</strong> Data yang dihapus tidak dapat dikembalikan!</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i> Batal
+                    </button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                        <i class="fas fa-trash-alt me-1"></i> Hapus
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 11">
+        <div id="toastContainer"></div>
+    </div>
+
+    <!-- Required Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.bootstrap5.min.js"></script>
+
+    <script>
+        // Global variables
+        let subjectsTable;
+        let currentSubject = null;
+        let subjectModal = null;
+        let deleteModal = null;
+
+        // Initialize when DOM is loaded
+        $(document).ready(function() {
+            // Initialize modals
+            subjectModal = new bootstrap.Modal(document.getElementById('subjectModal'));
+            deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            
+            // Initialize DataTable
+            initDataTable();
+            
+            // Load initial data
+            loadSubjects();
+            
+            // Load user data
+            loadUserData();
+        });
+
+        // Initialize DataTable
+        function initDataTable() {
+            subjectsTable = $('#subjectsTable').DataTable({
+                responsive: true,
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json"
+                },
+                dom: '<"top"<"d-flex justify-content-between align-items-center"lf>B>rt<"bottom"ip>',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        text: '<i class="fas fa-file-excel me-1"></i> Excel',
+                        className: 'btn btn-success btn-sm'
+                    },
+                    {
+                        extend: 'print',
+                        text: '<i class="fas fa-print me-1"></i> Print',
+                        className: 'btn btn-secondary btn-sm'
+                    }
+                ],
+                columns: [
+                    { data: 'no', className: 'text-center' },
+                    { data: 'kode', className: 'text-center' },
+                    { data: 'nama' },
+                    { 
+                        data: null,
+                        className: 'text-center',
+                        render: function(data, type, row) {
+                            return `
+                                <button class="btn btn-action btn-sm btn-outline-primary me-1" onclick="editSubject('${row.kode}')" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-action btn-sm btn-outline-danger" onclick="confirmDelete('${row.kode}')" title="Hapus">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            `;
+                        },
+                        orderable: false
+                    }
+                ]
+            });
+        }
+
+        // Load subjects data
+        function loadSubjects() {
+            showLoading(true);
+            
+            google.script.run
+                .withSuccessHandler(function(subjects) {
+                    const tableData = subjects.map((subject, index) => ({
+                        no: index + 1,
+                        kode: subject.kode || '-',
+                        nama: subject.nama || '-',
+                        original: subject
+                    }));
+                    
+                    subjectsTable.clear().rows.add(tableData).draw();
+                    showLoading(false);
+                })
+                .withFailureHandler(function(error) {
+                    console.error("Error loading subjects:", error);
+                    showToast('Gagal memuat data mata pelajaran', 'danger');
+                    showLoading(false);
+                })
+                .getSubjectData();
+        }
+
+        // Show add modal
+        function showAddModal() {
+            currentSubject = null;
+            $('#modalTitle').text('Tambah Mata Pelajaran');
+            $('#subjectForm')[0].reset();
+            $('#subjectForm input').removeClass('is-invalid');
+            subjectModal.show();
+        }
+
+        // Edit subject
+        function editSubject(kode) {
+            const row = subjectsTable.rows().data().toArray().find(row => row.kode === kode);
+            if (!row) {
+                showToast('Data tidak ditemukan', 'warning');
+                return;
+            }
+            
+            currentSubject = kode;
+            $('#modalTitle').text('Edit Mata Pelajaran');
+            $('#kodeMapel').val(row.original.kode);
+            $('#namaMapel').val(row.original.nama);
+            $('#subjectForm input').removeClass('is-invalid');
+            subjectModal.show();
+        }
+
+       // Save subject
+function saveSubject() {
+    const form = document.getElementById('subjectForm');
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+    }
+    
+    const subjectData = {
+        kode: $('#kodeMapel').val().trim().toUpperCase(),
+        nama: $('#namaMapel').val().trim()
+    };
+    
+    // Show loading state
+    const saveBtn = $('#saveBtn');
+    saveBtn.prop('disabled', true);
+    $('#saveBtnText').html('<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan');
+    
+    if (currentSubject) {
+        // Update existing subject
+        google.script.run
+            .withSuccessHandler(function(response) {
+                showToast(response.message || 'Data berhasil diperbarui', 'success');
+                subjectModal.hide();
+                loadSubjects();
+            })
+            .withFailureHandler(function(error) {
+                console.error('Error updating subject:', error);
+                showToast(error.message || 'Gagal memperbarui data', 'danger');
+            })
+            .updateSubject(currentSubject, subjectData)
+            .finally(() => {
+                saveBtn.prop('disabled', false);
+                $('#saveBtnText').html('<i class="fas fa-save me-1"></i> Simpan');
+            });
+    } else {
+        // Add new subject
+        google.script.run
+            .withSuccessHandler(function(response) {
+                showToast(response.message || 'Data berhasil disimpan', 'success');
+                subjectModal.hide();
+                loadSubjects();
+            })
+            .withFailureHandler(function(error) {
+                console.error('Error adding subject:', error);
+                showToast(error.message || 'Gagal menyimpan data', 'danger');
+            })
+            .addSubject(subjectData)
+            .finally(() => {
+                saveBtn.prop('disabled', false);
+                $('#saveBtnText').html('<i class="fas fa-save me-1"></i> Simpan');
+            });
+    }
+}
+
+        // Confirm delete
+        function confirmDelete(kode) {
+            const row = subjectsTable.rows().data().toArray().find(row => row.kode === kode);
+            if (!row) {
+                showToast('Data tidak ditemukan', 'warning');
+                return;
+            }
+            
+            currentSubject = kode;
+            $('#deleteKode').text(row.kode);
+            $('#deleteNama').text(row.nama);
+            deleteModal.show();
+            
+            // Set up delete button
+            $('#confirmDeleteBtn').off('click').on('click', function() {
+                deleteSubject();
+            });
+        }
+
+        // Delete subject
+        function deleteSubject() {
+            deleteModal.hide();
+            showLoading(true);
+            
+            google.script.run
+                .withSuccessHandler(function() {
+                    showToast('Data berhasil dihapus', 'success');
+                    loadSubjects();
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Error deleting subject:', error);
+                    showToast(error.message || 'Gagal menghapus data', 'danger');
+                    showLoading(false);
+                })
+                .deleteSubject(currentSubject);
+        }
+
+        // Refresh data
+        function refreshData() {
+            loadSubjects();
+        }
+
+        // Show loading state
+        function showLoading(show) {
+            if (show) {
+                $('#subjectsTable tbody').html(`
+                    <tr>
+                        <td colspan="4" class="text-center py-4">
+                            <i class="fas fa-spinner fa-spin me-2"></i> Memuat data...
+                        </td>
+                    </tr>
+                `);
+            }
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            const toast = $(`
+                <div class="toast show align-items-center text-white bg-${type === 'error' ? 'danger' : type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'danger' ? 'fa-exclamation-circle' : 'fa-info-circle'} me-2"></i>
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `);
+            
+            $('#toastContainer').append(toast);
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                toast.remove();
+            }, 5000);
+        }
+
+        // Load user data
+        function loadUserData() {
+            google.script.run
+                .withSuccessHandler(function(user) {
+                    $('#user-name').text(user.name || 'Admin');
+                    $('#user-initial').text(user.name ? user.name.charAt(0).toUpperCase() : 'A');
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Error loading user:', error);
+                })
+                .getCurrentUser();
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Apakah Anda yakin ingin keluar?')) {
+                google.script.run
+                    .withSuccessHandler(function() {
+                        window.location.href = google.script.run.getScriptUrl();
+                    })
+                    .logoutUser();
+            }
+        }
+
+        // Navigate to page
+        function goToPage(page) {
+            google.script.run.navigateToPage(page);
+        }
+    </script>
+</body>
+</html>
