@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Sistem Raport Digital</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Include CSS File -->
+  <?!= include('css'); ?>
+</head>
+<body>
+  <!-- Include Sidebar -->
+  <?!= include('sidebar'); ?>
+
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <!-- Header Section -->
+    <header class="header fade-in">
+      <h4 id="content-title">Dashboard</h4>
+      <div class="user-info">
+        <img src="https://res.cloudinary.com/di10axon3/image/upload/v1747889808/DSC_4881_tnwbnj.jpg" 
+        alt="User Avatar" 
+        class="user-avatar" />
+        <div>
+          <div id="user-name">Memuat...</div>
+          <small id="user-role" class="text-muted">Memuat...</small>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dynamic Content -->
+    <main id="dynamic-content">
+      <section id="dashboard-content" class="container-fluid">
+        <!-- Notification Alert -->
+        <div id="notification-alert" class="alert alert-dismissible fade" role="alert">
+          <span id="alert-message"></span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+          <div class="col-md-4 mb-4">
+            <div class="card stats-card fade-in h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center h-100">
+                  <div>
+                    <h6 class="text-muted mb-2">Total Siswa</h6>
+                    <h3 id="total-students" class="mb-0">
+                      <span class="loading-placeholder" style="width: 60px; height: 28px;"></span>
+                    </h3>
+                  </div>
+                  <div class="card-icon">
+                    <i class="fas fa-users text-primary"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-4 mb-4">
+            <div class="card stats-card fade-in h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center h-100">
+                  <div>
+                    <h6 class="text-muted mb-2">Total Mapel</h6>
+                    <h3 id="total-subjects" class="mb-0">
+                      <span class="loading-placeholder" style="width: 60px; height: 28px;"></span>
+                    </h3>
+                  </div>
+                  <div class="card-icon">
+                    <i class="fas fa-book text-success"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-4 mb-4">
+            <div class="card stats-card fade-in h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center h-100">
+                  <div>
+                    <h6 class="text-muted mb-2">Nilai Masuk</h6>
+                    <h3 id="total-grades" class="mb-0">
+                      <span class="loading-placeholder" style="width: 60px; height: 28px;"></span>
+                    </h3>
+                  </div>
+                  <div class="card-icon">
+                    <i class="fas fa-check-circle text-info"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Identitas Sekolah -->
+        <div class="card identity-section mb-4">
+          <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 class="h5 mb-0"><i class="fas fa-university me-2"></i>Data Sekolah</h2>
+            <button class="btn btn-sm btn-light" onclick="toggleEditMode('sekolah')">
+              <i class="fas fa-edit me-1"></i>Edit
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <div class="identity-item">
+                  <span class="identity-label">Nama Sekolah:</span> 
+                  <span id="display-namaSekolah" class="identity-value">Memuat data...</span>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="identity-item">
+                  <span class="identity-label">Alamat:</span> 
+                  <span id="display-alamatSekolah" class="identity-value">Memuat data...</span>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="identity-item">
+                  <span class="identity-label">Kelas:</span> 
+                  <span id="display-kelas" class="identity-value">Memuat data...</span>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="identity-item">
+                  <span class="identity-label">Fase:</span> 
+                  <span id="display-fase" class="identity-value">Memuat data...</span>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="identity-item">
+                  <span class="identity-label">Semester:</span> 
+                  <span id="display-semester" class="identity-value">Memuat data...</span>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="identity-item">
+                  <span class="identity-label">Tahun Pelajaran:</span> 
+                  <span id="display-tahunPelajaran" class="identity-value">Memuat data...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Identitas Guru -->
+        <div class="card identity-section mb-4">
+          <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 class="h5 mb-0"><i class="fas fa-chalkboard-teacher me-2"></i>Data Guru</h2>
+            <button class="btn btn-sm btn-light" onclick="toggleEditMode('guru')">
+              <i class="fas fa-edit me-1"></i>Edit
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <div class="identity-item">
+                  <span class="identity-label">Nama Guru:</span> 
+                  <span id="display-namaGuru" class="identity-value">Memuat data...</span>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="identity-item">
+                  <span class="identity-label">NIP Guru:</span> 
+                  <span id="display-nipGuru" class="identity-value">Memuat data...</span>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="identity-item">
+                  <span class="identity-label">Kepala Sekolah:</span> 
+                  <span id="display-kepalaSekolah" class="identity-value">Memuat data...</span>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="identity-item">
+                  <span class="identity-label">NIP Kepala Sekolah:</span> 
+                  <span id="display-nipKepalaSekolah" class="identity-value">Memuat data...</span>
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="identity-item">
+                  <span class="identity-label">Tanggal:</span> 
+                  <span id="display-tempatTanggal" class="identity-value">Memuat data...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Edit Identitas (Awalnya tersembunyi) -->
+        <div id="editFormContainer" class="card identity-form mb-4" style="display: none;">
+          <div class="card-header bg-primary text-white">
+            <h2 class="h5 mb-0"><i class="fas fa-edit me-2"></i>Edit Identitas</h2>
+          </div>
+          <div class="card-body">
+            <form id="identitasForm">
+              <div id="formSekolahContent">
+                <!-- Konten form sekolah akan diisi secara dinamis -->
+              </div>
+              
+              <div id="formGuruContent" class="mt-4">
+                <!-- Konten form guru akan diisi secara dinamis -->
+              </div>
+
+              <!-- Tombol Submit -->
+              <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                <button type="button" class="btn btn-outline-secondary" onclick="cancelEdit()">
+                  <i class="fas fa-times me-2"></i>Batal
+                </button>
+                <button type="submit" class="btn btn-primary" id="submitButton">
+                  <i class="fas fa-save me-2"></i>Simpan Perubahan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // App State
+    const appState = {
+      currentUser: null,
+      dashboardStats: null,
+      schoolIdentity: null,
+      currentEditMode: null // 'sekolah' atau 'guru'
+    };
+    
+    // DOM Ready Handler
+    document.addEventListener('DOMContentLoaded', function() {
+      initApp();
+    });
+    
+    function initApp() {
+      showLoadingState();
+      loadUserData();
+      loadDashboardStats();
+      loadSchoolIdentity();
+      
+      // Setup form submit handler
+      document.getElementById('identitasForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        handleFormSubmit();
+      });
+    }
+    
+    // Navigation Functions
+    function navigateToPage(page) {
+      google.script.run
+        .withSuccessHandler(url => window.top.location.href = url)
+        .withFailureHandler(handleNavigationError)
+        .navigateToPage(page);
+    }
+
+    function handleNavigationError(error) {
+      console.error('Navigation error:', error);
+      showAlert('Gagal navigasi ke halaman', 'danger');
+    }
+
+    function confirmLogout() {
+      Swal.fire({
+        title: 'Konfirmasi Keluar',
+        text: 'Anda yakin ingin keluar dari sistem?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, Keluar',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          logout();
+        }
+      });
+    }
+    
+    function logout() {
+      navigateToPage('login');
+    }
+
+    // Data Loading Functions
+    function loadUserData() {
+      google.script.run
+        .withSuccessHandler(updateUserUI)
+        .withFailureHandler(handleUserDataError)
+        .getCurrentUser();
+    }
+
+    function updateUserUI(user) {
+      appState.currentUser = user;
+      document.getElementById('user-name').textContent = user.name || 'Pengguna';
+      document.getElementById('user-role').textContent = user.role || 'Pengguna';
+      
+      // Update avatar
+      const avatar = document.querySelector('.user-avatar');
+      if (user.name) {
+        avatar.innerHTML = user.name.charAt(0).toUpperCase();
+        avatar.style.backgroundColor = stringToColor(user.name);
+        avatar.style.color = getContrastColor(stringToColor(user.name));
+      }
+    }
+    
+    // Helper untuk generate warna dari string
+    function stringToColor(str) {
+      if (!str) return '#6c757d'; // Warna default jika str kosong
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      let color = '#';
+      for (let i = 0; i < 3; i++) {
+        const value = (hash >> (i * 8)) & 0xFF;
+        color += ('00' + value.toString(16)).substr(-2);
+      }
+      return color;
+    }
+    
+    // Helper untuk menentukan warna kontras
+    function getContrastColor(hexColor) {
+      const r = parseInt(hexColor.substr(1, 2), 16);
+      const g = parseInt(hexColor.substr(3, 2), 16);
+      const b = parseInt(hexColor.substr(5, 2), 16);
+      const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+      return (yiq >= 128) ? '#000000' : '#ffffff';
+    }
+
+    function handleUserDataError(error) {
+      console.error('Error loading user:', error);
+      showAlert('Gagal memuat data pengguna', 'danger');
+    }
+
+    function loadDashboardStats() {
+      google.script.run
+        .withSuccessHandler(updateDashboardStats)
+        .withFailureHandler(handleStatsError)
+        .getDashboardStats();
+    }
+
+    function showLoadingState() {
+      // Loading state sudah dihandle oleh placeholder di HTML
+    }
+
+    function updateDashboardStats(stats) {
+      appState.dashboardStats = stats;
+      
+      // Format angka dengan separator ribuan
+      const formatNumber = (num) => num ? num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '0';
+      
+      document.getElementById('total-students').textContent = formatNumber(stats.totalStudents);
+      document.getElementById('total-subjects').textContent = formatNumber(stats.totalSubjects);
+      document.getElementById('total-grades').textContent = formatNumber(stats.totalGrades);
+    }
+
+    function handleStatsError(error) {
+      console.error('Error loading stats:', error);
+      document.getElementById('total-students').textContent = 'Error';
+      document.getElementById('total-subjects').textContent = 'Error';
+      document.getElementById('total-grades').textContent = 'Error';
+      showAlert('Gagal memuat statistik dashboard', 'danger');
+    }
+
+    function loadSchoolIdentity() {
+      google.script.run
+        .withSuccessHandler(updateSchoolIdentity)
+        .withFailureHandler(handleIdentityError)
+        .getSchoolIdentity();
+    }
+
+    function updateSchoolIdentity(identity) {
+      appState.schoolIdentity = identity;
+      
+      // Update display view
+      updateDisplayField('display-namaSekolah', identity.namaSekolah);
+      updateDisplayField('display-alamatSekolah', identity.alamatSekolah);
+      updateDisplayField('display-kelas', identity.kelas);
+      updateDisplayField('display-fase', identity.fase);
+      updateDisplayField('display-semester', identity.semester);
+      updateDisplayField('display-tahunPelajaran', identity.tahunPelajaran);
+      updateDisplayField('display-tempatTanggal', identity.tempatTanggal);
+      updateDisplayField('display-namaGuru', identity.namaGuru);
+      updateDisplayField('display-nipGuru', identity.nipGuru);
+      updateDisplayField('display-kepalaSekolah', identity.kepalaSekolah);
+      updateDisplayField('display-nipKepalaSekolah', identity.nipKepalaSekolah);
+      
+      // Update form templates
+      updateFormTemplates();
+    }
+    
+    function updateDisplayField(id, value) {
+      const element = document.getElementById(id);
+      if (element) {
+        element.textContent = value || '-';
+        if (!value) {
+          element.classList.add('text-muted');
+        } else {
+          element.classList.remove('text-muted');
+        }
+      }
+    }
+    
+    function updateFormTemplates() {
+      // Template form sekolah
+      const sekolahTemplate = `
+        <h3 class="h6 text-primary mb-3"><i class="fas fa-university me-2"></i>Data Sekolah</h3>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="namaSekolah" class="form-label">Nama Sekolah</label>
+            <input type="text" id="namaSekolah" class="form-control" value="${appState.schoolIdentity.namaSekolah || ''}" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="alamatSekolah" class="form-label">Alamat Sekolah</label>
+            <input type="text" id="alamatSekolah" class="form-control" value="${appState.schoolIdentity.alamatSekolah || ''}" required>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="kelas" class="form-label">Kelas</label>
+            <input type="text" id="kelas" class="form-control" value="${appState.schoolIdentity.kelas || ''}" required>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="fase" class="form-label">Fase</label>
+            <select id="fase" class="form-select" required>
+              <option value="">Pilih Fase</option>
+              <option value="A" ${appState.schoolIdentity.fase === 'A' ? 'selected' : ''}>Fase A</option>
+              <option value="B" ${appState.schoolIdentity.fase === 'B' ? 'selected' : ''}>Fase B</option>
+              <option value="C" ${appState.schoolIdentity.fase === 'C' ? 'selected' : ''}>Fase C</option>
+              <option value="D" ${appState.schoolIdentity.fase === 'D' ? 'selected' : ''}>Fase D</option>
+              <option value="E" ${appState.schoolIdentity.fase === 'E' ? 'selected' : ''}>Fase E</option>
+              <option value="F" ${appState.schoolIdentity.fase === 'F' ? 'selected' : ''}>Fase F</option>
+            </select>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="semester" class="form-label">Semester</label>
+            <select id="semester" class="form-select" required>
+              <option value="">Pilih Semester</option>
+              <option value="1" ${appState.schoolIdentity.semester === 'Semester 1' ? 'selected' : ''}>Semester 1</option>
+              <option value="2" ${appState.schoolIdentity.semester === 'Semester 2' ? 'selected' : ''}>Semester 2</option>
+            </select>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="tahunPelajaran" class="form-label">Tahun Pelajaran</label>
+            <input type="text" id="tahunPelajaran" class="form-control" value="${appState.schoolIdentity.tahunPelajaran || ''}" placeholder="2023/2024" required>
+          </div>
+        </div>
+      `;
+      
+      // Template form guru
+      const guruTemplate = `
+        <h3 class="h6 text-primary mb-3"><i class="fas fa-chalkboard-teacher me-2"></i>Data Guru & Kepala Sekolah</h3>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="tempatTanggal" class="form-label">Tanggal</label>
+            <input type="text" id="tempatTanggal" class="form-control" value="${appState.schoolIdentity.tempatTanggal || ''}" placeholder="Kota, DD-MM-YYYY" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="namaGuru" class="form-label">Nama Guru</label>
+            <input type="text" id="namaGuru" class="form-control" value="${appState.schoolIdentity.namaGuru || ''}" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="nipGuru" class="form-label">NIP Guru</label>
+            <input type="text" id="nipGuru" class="form-control" value="${appState.schoolIdentity.nipGuru || ''}" pattern="\\d*" title="Harus berupa angka">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="kepalaSekolah" class="form-label">Kepala Sekolah</label>
+            <input type="text" id="kepalaSekolah" class="form-control" value="${appState.schoolIdentity.kepalaSekolah || ''}" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="nipKepalaSekolah" class="form-label">NIP Kepala Sekolah</label>
+            <input type="text" id="nipKepalaSekolah" class="form-control" value="${appState.schoolIdentity.nipKepalaSekolah || ''}" pattern="\\d*" title="Harus berupa angka" required>
+          </div>
+        </div>
+      `;
+      
+      document.getElementById('formSekolahContent').innerHTML = sekolahTemplate;
+      document.getElementById('formGuruContent').innerHTML = guruTemplate;
+    }
+
+    function handleIdentityError(error) {
+      console.error('Error loading school identity:', error);
+      showAlert('Gagal memuat identitas sekolah', 'danger');
+    }
+
+    // Edit Mode Functions
+    function toggleEditMode(mode) {
+      appState.currentEditMode = mode;
+      const formContainer = document.getElementById('editFormContainer');
+      
+      // Scroll ke form
+      formContainer.scrollIntoView({ behavior: 'smooth' });
+      
+      // Tampilkan form yang sesuai
+      if (mode === 'sekolah') {
+        document.getElementById('formSekolahContent').style.display = 'block';
+        document.getElementById('formGuruContent').style.display = 'none';
+      } else if (mode === 'guru') {
+        document.getElementById('formSekolahContent').style.display = 'none';
+        document.getElementById('formGuruContent').style.display = 'block';
+      }
+      
+      // Tampilkan form container
+      formContainer.style.display = 'block';
+    }
+    
+    function cancelEdit() {
+      document.getElementById('editFormContainer').style.display = 'none';
+      appState.currentEditMode = null;
+    }
+    
+    // Fungsi yang diperbaiki:
+    function handleFormSubmit() {
+      const form = document.getElementById('identitasForm');
+      if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+      }
+      
+      const submitBtn = document.getElementById('submitButton');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...';
+      submitBtn.disabled = true;
+      
+      // Kumpulkan SEMUA data (sekolah dan guru)
+      const formData = {
+        // Data Sekolah
+        namaSekolah: document.getElementById('namaSekolah')?.value || '',
+        alamatSekolah: document.getElementById('alamatSekolah')?.value || '',
+        kelas: document.getElementById('kelas')?.value || '',
+        fase: document.getElementById('fase')?.value || '',
+        semester: document.getElementById('semester')?.value || '',
+        tahunPelajaran: document.getElementById('tahunPelajaran')?.value || '',
+        
+        // Data Guru
+        tempatTanggal: document.getElementById('tempatTanggal')?.value || '',
+        namaGuru: document.getElementById('namaGuru')?.value || '',
+        nipGuru: document.getElementById('nipGuru')?.value || '',
+        kepalaSekolah: document.getElementById('kepalaSekolah')?.value || '',
+        nipKepalaSekolah: document.getElementById('nipKepalaSekolah')?.value || ''
+      };
+      
+      google.script.run
+        .withSuccessHandler(function() {
+          Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: 'Identitas berhasil diperbarui',
+            timer: 2000,
+            showConfirmButton: false
+          });
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+          cancelEdit();
+          loadSchoolIdentity();
+        })
+        .withFailureHandler(function(error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal!',
+            text: 'Gagal menyimpan perubahan: ' + error.message
+          });
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+        })
+        .saveIdentitasData(formData);
+    }
+
+    // UI Utility Functions
+    function showAlert(message, type = 'info') {
+      const alert = document.getElementById('notification-alert');
+      const messageEl = document.getElementById('alert-message');
+      
+      // Set kelas alert
+      alert.className = `alert alert-${type} alert-dismissible fade show`;
+      
+      // Set icon berdasarkan type
+      let icon;
+      switch(type) {
+        case 'success': icon = 'check-circle'; break;
+        case 'danger': icon = 'exclamation-triangle'; break;
+        case 'warning': icon = 'exclamation-circle'; break;
+        default: icon = 'info-circle';
+      }
+      
+      // Set konten
+      messageEl.innerHTML = `<i class="fas fa-${icon} me-2"></i>${message}`;
+      
+      // Tampilkan alert
+      alert.style.display = 'block';
+      
+      // Sembunyikan setelah 5 detik
+      setTimeout(() => {
+        const alert = new bootstrap.Alert(document.getElementById('notification-alert'));
+        alert.close();
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
