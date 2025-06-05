@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Input Nilai - Sistem Raport Digital</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Include CSS File -->
+  <?!= include('css'); ?>
+  <style>
+    .invalid-input {
+      border: 2px solid #dc3545 !important;
+      background-color: #fff0f0 !important;
+    }
+    .valid-input {
+      border: 2px solid #28a745 !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- Include Sidebar -->
+  <?!= include('sidebar'); ?>
+
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <!-- Header Section -->
+    <header class="header fade-in">
+      <h4 id="content-title">Input Nilai</h4>
+      <div class="user-info">
+        <img src="https://res.cloudinary.com/di10axon3/image/upload/v1747889808/DSC_4881_tnwbnj.jpg" 
+       alt="User Avatar" 
+       class="user-avatar" />
+        <div>
+          <div id="user-name">Admin</div>
+          <small id="user-role" class="text-muted">Markus Paru</small>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Search Section -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title"><i class="fas fa-search me-2"></i>Cari Data Nilai</h5>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Nama Siswa</label>
+            <select class="form-select" id="searchSiswa">
+              <option value="">-- Semua Siswa --</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Kelas</label>
+            <select class="form-select" id="searchKelas">
+              <option value="">-- Semua Kelas --</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Mata Pelajaran</label>
+            <select class="form-select" id="searchMapel">
+              <option value="">-- Semua Mapel --</option>
+              <option>Pendidikan Agama dan Budi Pakerti</option>
+              <option>Pendidikan Pancasila</option>
+              <option>Bahasa Indonesia</option>
+              <option>Matematika</option>
+              <option>IPAS</option>
+              <option>Bahasa Inggris</option>
+              <option>Seni Tari</option>
+              <option>Seni Musik</option>
+              <option>Seni Rupa</option>
+              <option>Muatan Lokal</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <button type="button" class="btn btn-primary" id="btnCari">
+              <i class="fas fa-search me-1"></i> Cari
+            </button>
+            <button type="button" class="btn btn-danger float-end" id="btnHapusAll">
+              <i class="fas fa-trash-alt me-1"></i> Hapus Semua Data
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Search Results -->
+    <div class="card mb-4 d-none" id="searchResultsCard">
+      <div class="card-body">
+        <h5 class="card-title"><i class="fas fa-list me-2"></i>Hasil Pencarian</h5>
+        <div class="table-responsive">
+          <table class="table table-bordered" id="searchResultsTable">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Nama Siswa</th>
+                <th>NISN</th>
+                <th>Kelas</th>
+                <th>Mapel</th>
+                <th>Nilai Raport</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input Form -->
+    <form id="raporForm">
+      <!-- Identitas Siswa -->
+      <div class="form-section">
+        <h3><i class="fas fa-user-graduate me-2"></i>Identitas Siswa</h3>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Nama Siswa</label>
+            <select class="form-select" id="selectSiswa" required>
+              <option value="">-- Pilih Siswa --</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">NISN</label>
+            <input type="text" class="form-control" id="inputNISN" readonly required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Kelas</label>
+            <input type="text" class="form-control" id="inputKelas" readonly required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Mata Pelajaran</label>
+            <select class="form-select" id="selectMapel" required>
+              <option value="">-- Pilih Mata Pelajaran --</option>
+              <option>Pendidikan Agama dan Budi Pakerti</option>
+              <option>Pendidikan Pancasila</option>
+              <option>Bahasa Indonesia</option>
+              <option>Matematika</option>
+              <option>IPAS</option>
+              <option>Bahasa Inggris</option>
+              <option>Seni Tari</option>
+              <option>Seni Musik</option>
+              <option>Seni Rupa</option>
+              <option>Muatan Lokal</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nilai (TP) -->
+      <div class="form-section">
+        <h3><i class="fas fa-flask me-2"></i>Nilai (TP)</h3>
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle me-2"></i> Nilai harus antara 0-100. Jika diisi 1 digit, gunakan 0 di depan (misal: 05)
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered table-nilai">
+            <thead class="table-light">
+              <tr>
+                <th>TP 1</th>
+                <th>TP 2</th>
+                <th>TP 3</th>
+                <th>TP 4</th>
+                <th>TP 5</th>
+                <th>TP 6</th>
+                <th>TP 7</th>
+                <th>TP 8</th>
+                <th>TP 9</th>
+                <th>TP 10</th>
+                <th>TP 11</th>
+                <th>TP 12</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="number" class="form-control input-nilai" name="tp1" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="tp2" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="tp3" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="tp4" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="tp5" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="tp6" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="tp7" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="tp8" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="tp9" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="tp10" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="tp11" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="tp12" min="0" max="100" oninput="validateInput(this)"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Nilai (LM) -->
+      <div class="form-section">
+        <h3><i class="fas fa-book-open me-2"></i>Nilai (LM)</h3>
+        <div class="alert alert-warning">
+          <i class="fas fa-exclamation-triangle me-2"></i> Nilai harus antara 0-100. Jika diisi 1 digit, gunakan 0 di depan (misal: 05)
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered table-nilai">
+            <thead class="table-light">
+              <tr>
+                <th>LM 1</th>
+                <th>LM 2</th>
+                <th>LM 3</th>
+                <th>LM 4</th>
+                <th>LM 5</th>
+                <th>LM 6</th>
+                <th>LM 7</th>
+                <th>LM 8</th>
+                <th>LM 9</th>
+                <th>LM 10</th>
+                <th>LM 11</th>
+                <th>LM 12</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="number" class="form-control input-nilai" name="lm1" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="lm2" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="lm3" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="lm4" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="lm5" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="lm6" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="lm7" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="lm8" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="lm9" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="lm10" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="lm11" min="0" max="100" oninput="validateInput(this)"></td>
+                <td><input type="number" class="form-control input-nilai" name="lm12" min="0" max="100" oninput="validateInput(this)"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Nilai Ujian -->
+      <div class="form-section">
+        <h3><i class="fas fa-pencil-alt me-2"></i>Nilai Ujian</h3>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Nilai STS</label>
+            <input type="number" class="form-control input-nilai" name="sts" min="0" max="100" oninput="validateInput(this)">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Nilai SAS</label>
+            <input type="number" class="form-control input-nilai" name="sas" min="0" max="100" oninput="validateInput(this)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Nilai Akhir -->
+      <div class="form-section">
+        <h3><i class="fas fa-calculator me-2"></i>Nilai Akhir</h3>
+        <div class="row g-3">
+          <div class="col-md-3">
+            <div class="card h-100">
+              <div class="card-body text-center">
+                <h5 class="card-title">NA TP</h5>
+                <div class="nilai-akhir-value" id="nilaiTP">0</div>
+                <small class="text-muted">Rata-rata Nilai Tujian Pembelajaran</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card h-100">
+              <div class="card-body text-center">
+                <h5 class="card-title">NA LM</h5>
+                <div class="nilai-akhir-value" id="nilaiLM">0</div>
+                <small class="text-muted">Rata-rata Nilai Lingkup Materi </small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card h-100">
+              <div class="card-body text-center">
+                <h5 class="card-title">Nilai STS</h5>
+                <div class="nilai-akhir-value" id="nilaiSTS">0</div>
+                <small class="text-muted">NA Sumatif Tengah Semester</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="card h-100">
+              <div class="card-body text-center">
+                <h5 class="card-title">Nilai SAS</h5>
+                <div class="nilai-akhir-value" id="nilaiSAS">0</div>
+                <small class="text-muted">NA Sumatif Akhir Semester</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-12 mt-3">
+            <div class="card bg-light">
+              <div class="card-body text-center">
+                <h5 class="card-title">NILAI RAPORT</h5>
+                <div class="nilai-raport-value" id="nilaiRaport">0</div>
+                <small class="text-muted">(Nilai Akhir)</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="d-flex gap-2 mt-4">
+        <button type="button" class="btn btn-primary btn-action" id="btnSimpan">
+          <i class="fas fa-save me-1"></i> Simpan
+        </button>
+        <button type="button" class="btn btn-success btn-action" id="btnUpdate" style="display:none;">
+          <i class="fas fa-sync-alt me-1"></i> Update
+        </button>
+        <button type="button" class="btn btn-danger btn-action" id="btnHapus" style="display:none;">
+          <i class="fas fa-trash-alt me-1"></i> Hapus
+        </button>
+        <button type="button" class="btn btn-warning btn-action" id="btnReset">
+          <i class="fas fa-eraser me-1"></i> Reset
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Muat data siswa saat halaman dimuat
+      muatDataSiswa();
+      muatDataKelas();
+      setupEventListeners();
+      
+      // Hitung nilai saat input berubah
+      document.querySelectorAll('.input-nilai').forEach(input => {
+        input.addEventListener('input', hitungNilaiAkhir);
+      });
+    });
+
+    // Fungsi untuk memuat data siswa dari Google Sheets
+    function muatDataSiswa() {
+      const select = document.getElementById('selectSiswa');
+      const searchSelect = document.getElementById('searchSiswa');
+      
+      select.innerHTML = '<option value="">-- Pilih Siswa --</option>';
+      searchSelect.innerHTML = '<option value="">-- Semua Siswa --</option>';
+      
+      google.script.run
+        .withSuccessHandler(function(daftarSiswa) {
+          if (!daftarSiswa || daftarSiswa.length === 0) {
+            console.warn('Tidak ada data siswa yang diterima');
+            return;
+          }
+          
+          daftarSiswa.forEach(siswa => {
+            // Untuk form input
+            const option = document.createElement('option');
+            option.value = siswa.nama;
+            option.dataset.nisn = siswa.nisn || '';
+            option.dataset.kelas = siswa.kelas || '';
+            option.textContent = siswa.nama;
+            select.appendChild(option);
+            
+            // Untuk form pencarian
+            const searchOption = document.createElement('option');
+            searchOption.value = siswa.nama;
+            searchOption.textContent = siswa.nama;
+            searchSelect.appendChild(searchOption);
+          });
+        })
+        .withFailureHandler(function(error) {
+          console.error('Gagal memuat data siswa:', error);
+          alert('Gagal memuat data siswa. Silakan cek konsol untuk detail.');
+        })
+        .ambilDataSiswaUntukInput();
+    }
+
+    // Fungsi untuk memuat data kelas
+    function muatDataKelas() {
+      const select = document.getElementById('searchKelas');
+      
+      google.script.run
+        .withSuccessHandler(function(daftarKelas) {
+          if (!daftarKelas || daftarKelas.length === 0) {
+            console.warn('Tidak ada data kelas yang diterima');
+            return;
+          }
+          
+          daftarKelas.forEach(kelas => {
+            const option = document.createElement('option');
+            option.value = kelas;
+            option.textContent = kelas;
+            select.appendChild(option);
+          });
+        })
+        .withFailureHandler(function(error) {
+          console.error('Gagal memuat data kelas:', error);
+        })
+        .ambilDataKelas();
+    }
+
+    // Fungsi untuk validasi input nilai
+    function validateInput(input) {
+      const value = input.value;
+      
+      // Reset kelas validasi
+      input.classList.remove('invalid-input', 'valid-input');
+      
+      // Jika input kosong, tidak perlu validasi
+      if (value === '') return;
+      
+      // Validasi: harus antara 0-100 dan minimal 2 digit jika < 10
+      if (value < 0 || value > 100 || (value < 10 && value.length === 1)) {
+        input.classList.add('invalid-input');
+      } else {
+        input.classList.add('valid-input');
+      }
+      
+      // Hitung nilai akhir
+      hitungNilaiAkhir();
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+      // Auto-fill NISN dan Kelas saat siswa dipilih
+      document.getElementById('selectSiswa').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        document.getElementById('inputNISN').value = selectedOption.dataset.nisn || '';
+        document.getElementById('inputKelas').value = selectedOption.dataset.kelas || '';
+        
+        // Cari data nilai jika sudah memilih mapel
+        const mapel = document.getElementById('selectMapel').value;
+        if (mapel) {
+          cariDataNilai();
+        }
+      });
+
+      // Auto-cari data saat mapel dipilih
+      document.getElementById('selectMapel').addEventListener('change', function() {
+        const nisn = document.getElementById('inputNISN').value;
+        if (nisn) {
+          cariDataNilai();
+        }
+      });
+
+      // Tombol Simpan
+      document.getElementById('btnSimpan').addEventListener('click', simpanData);
+
+      // Tombol Update
+      document.getElementById('btnUpdate').addEventListener('click', updateData);
+
+      // Tombol Hapus
+      document.getElementById('btnHapus').addEventListener('click', hapusData);
+
+      // Tombol Reset
+      document.getElementById('btnReset').addEventListener('click', resetForm);
+      
+      // Tombol Cari
+      document.getElementById('btnCari').addEventListener('click', cariData);
+      
+      // Tombol Hapus All
+      document.getElementById('btnHapusAll').addEventListener('click', konfirmasiHapusAll);
+    }
+
+    // Fungsi untuk menghitung nilai akhir
+    function hitungNilaiAkhir() {
+      let totalTP = 0, totalLM = 0;
+      let countTP = 0, countLM = 0;
+
+      // Hitung nilai TP (1-12)
+      for (let i = 1; i <= 12; i++) {
+        const nilai = parseFloat(document.querySelector(`[name="tp${i}"]`).value);
+        if (!isNaN(nilai)) {
+          totalTP += nilai;
+          countTP++;
+        }
+      }
+
+      // Hitung nilai LM (1-12)
+      for (let i = 1; i <= 12; i++) {
+        const nilai = parseFloat(document.querySelector(`[name="lm${i}"]`).value);
+        if (!isNaN(nilai)) {
+          totalLM += nilai;
+          countLM++;
+        }
+      }
+
+      // Hitung nilai STS dan SAS
+      const nilaiSTS = parseFloat(document.querySelector('[name="sts"]').value) || 0;
+      const nilaiSAS = parseFloat(document.querySelector('[name="sas"]').value) || 0;
+
+      // Update nilai akhir
+      const avgTP = countTP > 0 ? (totalTP / countTP) : 0;
+      const avgLM = countLM > 0 ? (totalLM / countLM) : 0;
+      
+      document.getElementById('nilaiTP').textContent = avgTP.toFixed(2);
+      document.getElementById('nilaiLM').textContent = avgLM.toFixed(2);
+      document.getElementById('nilaiSTS').textContent = nilaiSTS.toFixed(2);
+      document.getElementById('nilaiSAS').textContent = nilaiSAS.toFixed(2);
+      
+      // Hitung nilai raport
+      const nilaiRaport = (parseFloat(avgTP) + parseFloat(avgLM) + nilaiSTS + nilaiSAS) / 4;
+      document.getElementById('nilaiRaport').textContent = nilaiRaport.toFixed(2);
+    }
+
+    // Fungsi untuk cari data nilai
+    function cariDataNilai() {
+      const nisn = document.getElementById('inputNISN').value;
+      const mapel = document.getElementById('selectMapel').value;
+      
+      if (!nisn || !mapel) return;
+
+      google.script.run
+        .withSuccessHandler(function(data) {
+          if (data) {
+            // Isi nilai TP (1-12)
+            for (let i = 1; i <= 12; i++) {
+              const input = document.querySelector(`[name="tp${i}"]`);
+              if (input) {
+                input.value = data[`tp${i}`] || '';
+                validateInput(input);
+              }
+            }
+            
+            // Isi nilai LM (1-12)
+            for (let i = 1; i <= 12; i++) {
+              const input = document.querySelector(`[name="lm${i}"]`);
+              if (input) {
+                input.value = data[`lm${i}`] || '';
+                validateInput(input);
+              }
+            }
+            
+            // Isi nilai STS dan SAS
+            const stsInput = document.querySelector('[name="sts"]');
+            const sasInput = document.querySelector('[name="sas"]');
+            stsInput.value = data.sts || '';
+            sasInput.value = data.sas || '';
+            validateInput(stsInput);
+            validateInput(sasInput);
+            
+            // Hitung ulang nilai akhir
+            hitungNilaiAkhir();
+            
+            // Tampilkan tombol update/hapus
+            document.getElementById('btnUpdate').style.display = 'inline-block';
+            document.getElementById('btnHapus').style.display = 'inline-block';
+            document.getElementById('btnSimpan').style.display = 'none';
+          } else {
+            // Sembunyikan tombol update/hapus jika data tidak ditemukan
+            document.getElementById('btnUpdate').style.display = 'none';
+            document.getElementById('btnHapus').style.display = 'none';
+            document.getElementById('btnSimpan').style.display = 'inline-block';
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Gagal memuat data nilai:', error);
+        })
+        .cariDataNilai(nisn, mapel);
+    }
+
+    // Fungsi untuk cari data berdasarkan kriteria
+function cariData() {
+  // Ambil nilai dari input pencarian
+  const nama = document.getElementById('searchSiswa').value;
+  const kelas = document.getElementById('searchKelas').value;
+  const mapel = document.getElementById('searchMapel').value;
+  
+  // Tampilkan loading
+  const btn = document.getElementById('btnCari');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Mencari...';
+  btn.disabled = true;
+  
+  // Kosongkan tabel sementara
+  const tableBody = document.querySelector('#searchResultsTable tbody');
+  tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Memuat data...</td></tr>';
+  
+  // Tampilkan card hasil pencarian
+  document.getElementById('searchResultsCard').classList.remove('d-none');
+  
+  google.script.run
+    .withSuccessHandler(function(results) {
+      // Kembalikan tombol ke keadaan semula
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      
+      // Kosongkan tabel
+      tableBody.innerHTML = '';
+      
+      if (!results || results.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7" class="text-center">Tidak ada data ditemukan</td></tr>';
+        return;
+      }
+      
+      // Isi tabel dengan hasil pencarian
+      results.forEach((row, index) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${row.nama_siswa || '-'}</td>
+          <td>${row.nisn || '-'}</td>
+          <td>${row.kelas || '-'}</td>
+          <td>${row.mata_pelajaran || '-'}</td>
+          <td>${row.nilai_raport ? row.nilai_raport.toFixed(2) : '0'}</td>
+          <td class="text-nowrap">
+            <button class="btn btn-sm btn-primary btn-edit me-1" 
+                    data-nisn="${row.nisn}" 
+                    data-mapel="${row.mata_pelajaran}">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="btn btn-sm btn-danger btn-delete" 
+                    data-nisn="${row.nisn}" 
+                    data-mapel="${row.mata_pelajaran}">
+              <i class="fas fa-trash"></i> Hapus
+            </button>
+          </td>
+        `;
+        tableBody.appendChild(tr);
+      });
+      
+      // Tambahkan event listener untuk tombol edit/hapus
+      setupEditDeleteButtons();
+    })
+    .withFailureHandler(function(error) {
+      // Kembalikan tombol ke keadaan semula
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      
+      // Tampilkan pesan error
+      tableBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger">Error: ${error.message}</td></tr>`;
+      console.error('Gagal mencari data:', error);
+    })
+    .cariDataBerdasarkanKriteria(nama, kelas, mapel);
+}
+
+// Fungsi untuk setup tombol edit dan hapus
+function setupEditDeleteButtons() {
+  // Tombol Edit
+  document.querySelectorAll('.btn-edit').forEach(btn => {
+    btn.addEventListener('click', function() {
+      editData(this.dataset.nisn, this.dataset.mapel);
+    });
+  });
+  
+  // Tombol Hapus
+  document.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', function() {
+      if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+        hapusData(this.dataset.nisn, this.dataset.mapel);
+      }
+    });
+  });
+}
+    // Fungsi untuk validasi form
+    function validasiForm() {
+      const siswa = document.getElementById('selectSiswa').value;
+      const mapel = document.getElementById('selectMapel').value;
+      
+      if (!siswa) {
+        alert('Silakan pilih siswa terlebih dahulu!');
+        return false;
+      }
+      
+      if (!mapel) {
+        alert('Silakan pilih mata pelajaran!');
+        return false;
+      }
+      
+      // Validasi input nilai
+      let isValid = true;
+      document.querySelectorAll('.input-nilai').forEach(input => {
+        const value = input.value;
+        if (value !== '' && (value < 0 || value > 100 || (value < 10 && value.length === 1))) {
+          input.classList.add('invalid-input');
+          isValid = false;
+        }
+      });
+      
+      if (!isValid) {
+        alert('Ada nilai yang tidak valid! Harap periksa kembali input Anda.');
+        return false;
+      }
+      
+      return true;
+    }
+
+    // Fungsi untuk mengumpulkan data dari form
+    function kumpulkanData() {
+      const data = {
+        nama_siswa: document.getElementById('selectSiswa').value,
+        nisn: document.getElementById('inputNISN').value,
+        kelas: document.getElementById('inputKelas').value,
+        mata_pelajaran: document.getElementById('selectMapel').value,
+        sts: document.querySelector('[name="sts"]').value || '0',
+        sas: document.querySelector('[name="sas"]').value || '0',
+        na_tp: document.getElementById('nilaiTP').textContent,
+        na_lm: document.getElementById('nilaiLM').textContent,
+        nilai_raport: document.getElementById('nilaiRaport').textContent
+      };
+
+      // Tambahkan nilai TP (1-12)
+      for (let i = 1; i <= 12; i++) {
+        data[`tp${i}`] = document.querySelector(`[name="tp${i}"]`).value || '0';
+      }
+
+      // Tambahkan nilai LM (1-12)
+      for (let i = 1; i <= 12; i++) {
+        data[`lm${i}`] = document.querySelector(`[name="lm${i}"]`).value || '0';
+      }
+
+      return data;
+    }
+
+    // Fungsi untuk menyimpan data
+    function simpanData() {
+      if (!validasiForm()) return;
+      
+      const data = kumpulkanData();
+      
+      // Tampilkan loading
+      const btn = document.getElementById('btnSimpan');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...';
+      btn.disabled = true;
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          
+          if (response.sukses) {
+            alert(response.pesan);
+            // Tampilkan tombol update/hapus
+            document.getElementById('btnUpdate').style.display = 'inline-block';
+            document.getElementById('btnHapus').style.display = 'inline-block';
+            document.getElementById('btnSimpan').style.display = 'none';
+            
+            // Refresh hasil pencarian jika ada
+            if (!document.getElementById('searchResultsCard').classList.contains('d-none')) {
+              cariData();
+            }
+          } else {
+            alert(response.pesan || 'Gagal menyimpan data');
+          }
+        })
+        .withFailureHandler(function(error) {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          alert('Error: ' + error.message);
+          console.error('Error:', error);
+        })
+        .simpanDataNilai(data);
+    }
+
+    // Fungsi untuk update data
+    function updateData() {
+      if (!validasiForm()) return;
+      
+      const data = kumpulkanData();
+      
+      // Tampilkan loading
+      const btn = document.getElementById('btnUpdate');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Memperbarui...';
+      btn.disabled = true;
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          alert(response.pesan);
+          if (response.success) {
+            // Refresh hasil pencarian jika ada
+            if (!document.getElementById('searchResultsCard').classList.contains('d-none')) {
+              cariData();
+            }
+          }
+        })
+        .withFailureHandler(function(error) {
+          alert('Gagal memperbarui data: ' + error.message);
+        })
+        .finally(() => {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        })
+        .updateDataNilai(data);
+    }
+
+    // Fungsi untuk menghapus data
+    function hapusData(nisn, mapel) {
+      if (!nisn || !mapel) {
+        // Jika dipanggil dari tombol hapus di form
+        nisn = document.getElementById('inputNISN').value;
+        mapel = document.getElementById('selectMapel').value;
+        
+        if (!nisn || !mapel) {
+          alert('Data tidak valid untuk dihapus!');
+          return;
+        }
+
+        if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+          return;
+        }
+      }
+
+      // Tampilkan loading
+      const btn = nisn === document.getElementById('inputNISN').value ? 
+        document.getElementById('btnHapus') : null;
+      
+      if (btn) {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Menghapus...';
+        btn.disabled = true;
+      }
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if (btn) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+          }
+          
+          alert(response.pesan);
+          if (response.sukses) {
+            if (nisn === document.getElementById('inputNISN').value) {
+              resetForm();
+            }
+            // Refresh hasil pencarian jika ada
+            if (!document.getElementById('searchResultsCard').classList.contains('d-none')) {
+              cariData();
+            }
+          }
+        })
+        .withFailureHandler(function(error) {
+          if (btn) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+          }
+          alert('Gagal menghapus data: ' + error.message);
+        })
+        .hapusDataNilai(nisn, mapel);
+    }
+
+    // Fungsi untuk konfirmasi hapus semua data
+    function konfirmasiHapusAll() {
+      let konfirmasi1 = confirm('PERINGATAN PERTAMA: Anda akan menghapus SEMUA data nilai. Lanjutkan?');
+      if (!konfirmasi1) return;
+      
+      let konfirmasi2 = confirm('PERINGATAN KEDUA: Ini akan menghapus SEMUA data nilai dan tidak dapat dikembalikan. Yakin?');
+      if (!konfirmasi2) return;
+      
+      let konfirmasi3 = confirm('PERINGATAN TERAKHIR: Masih yakin ingin menghapus SEMUA data nilai?');
+      if (!konfirmasi3) return;
+      
+      // Tampilkan loading
+      const btn = document.getElementById('btnHapusAll');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Menghapus...';
+      btn.disabled = true;
+
+      google.script.run
+        .withSuccessHandler(function(response) {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          
+          alert(response.pesan);
+          if (response.sukses) {
+            // Reset form dan hasil pencarian
+            resetForm();
+            document.getElementById('searchResultsCard').classList.add('d-none');
+          }
+        })
+        .withFailureHandler(function(error) {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          alert('Gagal menghapus data: ' + error.message);
+        })
+        .hapusSemuaDataNilai();
+    }
+
+    // Fungsi untuk reset form
+    function resetForm() {
+      document.getElementById('raporForm').reset();
+      document.getElementById('nilaiTP').textContent = '0';
+      document.getElementById('nilaiLM').textContent = '0';
+      document.getElementById('nilaiSTS').textContent = '0';
+      document.getElementById('nilaiSAS').textContent = '0';
+      document.getElementById('nilaiRaport').textContent = '0';
+      document.getElementById('btnUpdate').style.display = 'none';
+      document.getElementById('btnHapus').style.display = 'none';
+      document.getElementById('btnSimpan').style.display = 'inline-block';
+      
+      // Reset validasi input
+      document.querySelectorAll('.input-nilai').forEach(input => {
+        input.classList.remove('invalid-input', 'valid-input');
+      });
+    }
+
+    // Logout
+    function logout() {
+      if (confirm('Apakah Anda yakin ingin keluar?')) {
+        google.script.run
+          .withSuccessHandler(function() {
+            window.location.href = google.script.run.getScriptUrl();
+          })
+          .logoutUser();
+      }
+    }
+  </script>
+</body>
+</html>
