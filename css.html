@@ -1,0 +1,355 @@
+<style>
+  /* === RESET DAN DASAR === */
+  * {
+    box-sizing: border-box;
+  }
+
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fa;
+    color: #333;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  /* === SIDEBAR === */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px;
+    height: 100vh;
+    background: linear-gradient(180deg, #1e3c72, #2a5298);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    padding: 30px 20px;
+    overflow-y: auto;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+
+  .sidebar-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .brand-logo i {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    color: #ffcd39;
+  }
+
+  .brand-name {
+    font-weight: 700;
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+  }
+
+  .brand-subtitle {
+    font-weight: 300;
+    font-size: 0.9rem;
+    color: #cfd8dc;
+    margin-top: 3px;
+  }
+
+  .sidebar-menu {
+    flex-grow: 1;
+  }
+
+  .menu-section {
+    margin-bottom: 30px;
+  }
+
+  .menu-section-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #a8c0ff;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+  }
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    color: #d1d9ff;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .menu-item:hover,
+  .menu-item.active {
+    background-color: #ffcd39;
+    color: #1e3c72;
+  }
+
+  .menu-icon {
+    font-size: 1.3rem;
+    margin-right: 15px;
+  }
+
+  /* === MAIN CONTENT === */
+  .main-content {
+    margin-left: 260px;
+    padding: 30px 40px;
+    background: #fff;
+    min-height: 100vh;
+    box-shadow: inset 0 0 20px #e3e6ef;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e1e4f2;
+    margin-bottom: 30px;
+  }
+
+  header h4#content-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1e3c72;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .user-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    margin-right: 12px;
+  }
+
+  #user-name {
+    font-weight: 600;
+  }
+
+  #user-role {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: -3px;
+  }
+
+  .logout-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.3rem;
+    color: #ff3b3b;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+
+  .logout-btn:hover {
+    color: #b82e2e;
+  }
+
+  /* === DASHBOARD CARDS === */
+  .dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+  }
+
+  .card {
+    background: #f7f9fc;
+    border-radius: 12px;
+    padding: 25px 30px;
+    box-shadow: 0 8px 16px rgba(30, 60, 114, 0.1);
+    transition: transform 0.3s;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+  }
+
+  .card-icon {
+    font-size: 2.7rem;
+    color: #1e3c72;
+    margin-bottom: 15px;
+  }
+
+  .card-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1e3c72;
+    margin-bottom: 8px;
+  }
+
+  .card-value {
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: #2a5298;
+  }
+
+  /* === TABLE === */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    box-shadow: 0 6px 12px rgba(30, 60, 114, 0.05);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  thead {
+    background: #1e3c72;
+    color: #fff;
+  }
+
+  th, td {
+    padding: 14px 20px;
+    text-align: left;
+    border-bottom: 1px solid #e1e4f2;
+  }
+
+  tbody tr:hover {
+    background-color: #f0f4ff;
+  }
+
+  th:first-child, td:first-child {
+    padding-left: 25px;
+  }
+
+  th:last-child, td:last-child {
+    padding-right: 25px;
+  }
+
+  th {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  /* === BUTTONS === */
+  .btn {
+    background-color: #1e3c72;
+    color: #fff;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .btn:hover {
+    background-color: #2a5298;
+  }
+
+  .btn-danger {
+    background-color: #e74c3c;
+  }
+
+  .btn-danger:hover {
+    background-color: #c0392b;
+  }
+
+  .btn-secondary {
+    background-color: #7f8c8d;
+  }
+
+  .btn-secondary:hover {
+    background-color: #95a5a6;
+  }
+
+  /* === FORM === */
+  input[type="text"],
+  input[type="number"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1.8px solid #d1d9ff;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #333;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  select:focus,
+  textarea:focus {
+    border-color: #1e3c72;
+  }
+
+  label {
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: inline-block;
+    color: #1e3c72;
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  /* === SECTION TITLE === */
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 25px;
+    color: #1e3c72;
+    border-bottom: 3px solid #ffcd39;
+    display: inline-block;
+    padding-bottom: 5px;
+  }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 900px) {
+    .sidebar {
+      width: 220px;
+    }
+    .main-content {
+      margin-left: 220px;
+      padding: 25px;
+    }
+    .dashboard-cards {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 18px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .sidebar {
+      position: relative;
+      width: 100%;
+      height: auto;
+      flex-direction: row;
+      padding: 10px;
+      overflow-x: auto;
+    }
+    .sidebar-menu {
+      display: flex;
+      gap: 12px;
+    }
+    .menu-item {
+      padding: 10px 12px;
+      font-size: 0.9rem;
+    }
+    .main-content {
+      margin-left: 0;
+      padding: 20px;
+    }
+  }
+</style>
