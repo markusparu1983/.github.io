@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Nilai - Sistem Raport Digital</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- PDF Export Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <!-- Excel Export Library -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+  <!-- Include CSS File -->
+  <?!= include('css'); ?>
+</head>
+<body>
+  <!-- Include Sidebar -->
+  <?!= include('sidebar'); ?>
+    </header>
+  <div class="main-content">
+    <div class="grade-container">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="grade-title">Daftar Nilai Siswa</h3>
+        <div class="action-buttons">
+          <button class="btn-export" onclick="exportToPDF()">
+            <i class="fas fa-file-pdf"></i> PDF
+          </button>
+          <button class="btn-export" onclick="exportToExcel()">
+            <i class="fas fa-file-excel"></i> Excel
+          </button>
+          <button class="btn-export" onclick="window.print()">
+            <i class="fas fa-print"></i> Print
+          </button>
+        </div>
+      </div>
+      
+      <!-- Filter Controls -->
+      <div class="filter-controls">
+        <input type="text" id="search-input" class="form-control" placeholder="Cari nama siswa..." onkeyup="filterData()">
+      </div>
+      
+      <!-- Grade Table -->
+      <div class="table-responsive">
+        <table id="grade-table">
+          <thead>
+            <tr>
+              <th rowspan="2" class="fixed-column">No</th>
+              <th rowspan="2" class="fixed-column">Nama Siswa</th>
+              <th rowspan="2" class="fixed-column">NISN</th>
+              <th colspan="4">Pendidikan Agama dan Budi Pakerti</th>
+              <th colspan="4">Matematika</th>
+              <th colspan="4">Bahasa Indonesia</th>
+              <th colspan="4">IPAS</th>
+              <th colspan="4">Pendidikan Pancasila</th>
+              <th colspan="4">PJOK</th>
+              <th colspan="4">Seni Tari</th>
+              <th colspan="4">Seni Musik</th>
+              <th colspan="4">Seni Rupa</th>
+              <th colspan="4">Muatan Lokal</th>
+              <th colspan="4">Bahasa Inggris</th>
+              <th rowspan="2">Rata-rata</th>
+              <th colspan="3">Kehadiran</th>
+              <th colspan="4">Ekstrakurikuler</th>
+            </tr>
+            <tr>
+              <!-- Header komponen nilai untuk setiap mata pelajaran -->
+              <th>STP</th><th>SLM</th><th>STS</th><th>SAS</th>
+              <th>STP</th><th>SLM</th><th>STS</th><th>SAS</th>
+              <th>STP</th><th>SLM</th><th>STS</th><th>SAS</th>
+              <th>STP</th><th>SLM</th><th>STS</th><th>SAS</th>
+              <th>STP</th><th>SLM</th><th>STS</th><th>SAS</th>
+              <th>STP</th><th>SLM</th><th>STS</th><th>SAS</th>
+              <th>STP</th><th>SLM</th><th>STS</th><th>SAS</th>
+              <th>STP</th><th>SLM</th><th>STS</th><th>SAS</th>
+              <th>STP</th><th>SLM</th><th>STS</th><th>SAS</th>
+              <th>STP</th><th>SLM</th><th>STS</th><th>SAS</th>
+              <th>S</th><th>I</th><th>TK</th>
+              <th>Pramuka</th><th>Olahraga</th><th>Kesenian</th><th>Kerohanian</th>
+            </tr>
+          </thead>
+          <tbody id="grade-data">
+            <!-- Data akan diisi oleh JavaScript -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Data Summary -->
+      <div class="d-flex justify-content-between mt-3">
+        <div class="text-muted" id="data-summary">Menampilkan 0 dari 0 siswa</div>
+        <div class="pagination">
+          <button class="btn btn-sm btn-outline-primary" id="prev-page" disabled>Sebelumnya</button>
+          <span class="mx-2" id="page-info">Halaman 1</span>
+          <button class="btn btn-sm btn-outline-primary" id="next-page" disabled>Selanjutnya</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Variabel global
+    let allGradeData = [];
+    let filteredData = [];
+    let currentPage = 1;
+    const rowsPerPage = 20;
+    
+    // Inisialisasi halaman
+    document.addEventListener('DOMContentLoaded', function() {
+      loadGradeData();
+      
+      // Event listener untuk paginasi
+      document.getElementById('prev-page').addEventListener('click', function() {
+        if (currentPage > 1) {
+          currentPage--;
+          renderGradeData();
+        }
+      });
+      
+      document.getElementById('next-page').addEventListener('click', function() {
+        if (currentPage * rowsPerPage < filteredData.length) {
+          currentPage++;
+          renderGradeData();
+        }
+      });
+    });
+    
+    // Memuat data nilai dari Google Sheets
+    function loadGradeData() {
+      google.script.run.withSuccessHandler(function(data) {
+        allGradeData = data;
+        filteredData = [...allGradeData];
+        renderGradeData();
+      }).withFailureHandler(function(error) {
+        console.error('Error loading data:', error);
+        alert('Gagal memuat data. Silakan coba lagi.');
+      }).getGradeData();
+    }
+    
+    // Filter data berdasarkan pencarian
+    function filterData() {
+      const searchTerm = document.getElementById('search-input').value.toLowerCase();
+      
+      filteredData = allGradeData.filter(student => {
+        return student.name.toLowerCase().includes(searchTerm) || 
+               student.nisn.toLowerCase().includes(searchTerm);
+      });
+      
+      currentPage = 1;
+      renderGradeData();
+    }
+    
+    // Menampilkan data nilai ke tabel
+    function renderGradeData() {
+      const tbody = document.getElementById('grade-data');
+      tbody.innerHTML = '';
+      
+      // Menghitung paginasi
+      const startIndex = (currentPage - 1) * rowsPerPage;
+      const endIndex = Math.min(startIndex + rowsPerPage, filteredData.length);
+      const pageData = filteredData.slice(startIndex, endIndex);
+      
+      // Update info summary
+      document.getElementById('data-summary').textContent = 
+        `Menampilkan ${startIndex + 1}-${endIndex} dari ${filteredData.length} siswa`;
+      document.getElementById('page-info').textContent = 
+        `Halaman ${currentPage} dari ${Math.ceil(filteredData.length / rowsPerPage)}`;
+      
+      // Update tombol paginasi
+      document.getElementById('prev-page').disabled = currentPage === 1;
+      document.getElementById('next-page').disabled = currentPage * rowsPerPage >= filteredData.length;
+      
+      // Menambahkan baris ke tabel
+      pageData.forEach((student, index) => {
+        const row = document.createElement('tr');
+        
+        // Informasi dasar
+        row.innerHTML = `
+          <td class="fixed-column">${startIndex + index + 1}</td>
+          <td class="fixed-column">${student.name}</td>
+          <td class="fixed-column">${student.nisn}</td>
+        `;
+        
+        // Data mata pelajaran
+        const subjects = [
+          'Pendidikan Agama dan Budi Pakerti',
+          'Matematika',
+          'Bahasa Indonesia',
+          'IPAS',
+          'Pendidikan Pancasila',
+          'Pendidikan Jasmani Olahraga dan Kesehatan',
+          'Seni Tari',
+          'Seni Musik',
+          'Seni Rupa',
+          'Muatan Lokal',
+          'Bahasa Inggris'
+        ];
+        
+        subjects.forEach(subject => {
+          const subjectData = student.subjects[subject] || {};
+          row.innerHTML += `
+            <td>${subjectData.stp || '-'}</td>
+            <td>${subjectData.slm || '-'}</td>
+            <td>${subjectData.sts || '-'}</td>
+            <td>${subjectData.sas || '-'}</td>
+          `;
+        });
+        
+        // Rata-rata
+        row.innerHTML += `
+          <td class="highlight-cell">${student.summary.rta || '-'}</td>
+        `;
+        
+        // Data kehadiran
+        row.innerHTML += `
+          <td>${student.attendance.s || '0'}</td>
+          <td>${student.attendance.i || '0'}</td>
+          <td>${student.attendance.tk || '0'}</td>
+        `;
+        
+        // Data ekstrakurikuler
+        row.innerHTML += `
+          <td>${student.extracurricular.pramuka ? '<i class="fas fa-check check-mark"></i>' : ''}</td>
+          <td>${student.extracurricular.olahraga ? '<i class="fas fa-check check-mark"></i>' : ''}</td>
+          <td>${student.extracurricular.kesenian ? '<i class="fas fa-check check-mark"></i>' : ''}</td>
+          <td>${student.extracurricular.kerohanian ? '<i class="fas fa-check check-mark"></i>' : ''}</td>
+        `;
+        
+        tbody.appendChild(row);
+      });
+    }
+    
+    // Ekspor ke PDF
+    function exportToPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({
+        orientation: 'landscape'
+      });
+      
+      // Judul
+      doc.setFontSize(16);
+      doc.text('Laporan Nilai Siswa', 14, 15);
+      doc.setFontSize(10);
+      doc.text(`Dicetak pada: ${new Date().toLocaleDateString()}`, 14, 20);
+      
+      // Header tabel
+      const headers = [
+        'No', 'Nama', 'NISN',
+        ...['Pendidikan Agama', 'Matematika', 'Bahasa Indonesia', 'IPAS', 'PPKN', 'PJOK', 
+            'Seni Tari', 'Seni Musik', 'Seni Rupa', 'Muatan Lokal', 'Bahasa Inggris']
+            .flatMap(subject => [`${subject} STP`, `${subject} SLM`, `${subject} STS`, `${subject} SAS`]),
+        'Rata-rata',
+        'Sakit', 'Izin', 'Tanpa Keterangan',
+        'Pramuka', 'Olahraga', 'Kesenian', 'Kerohanian'
+      ];
+      
+      // Data tabel
+      const data = filteredData.map((student, index) => {
+        const row = [
+          index + 1,
+          student.name,
+          student.nisn,
+          ...['Pendidikan Agama dan Budi Pakerti', 'Matematika', 'Bahasa Indonesia', 'IPAS', 
+              'Pendidikan Pancasila', 'Pendidikan Jasmani Olahraga dan Kesehatan',
+              'Seni Tari', 'Seni Musik', 'Seni Rupa', 'Muatan Lokal', 'Bahasa Inggris']
+              .flatMap(subject => {
+                const s = student.subjects[subject] || {};
+                return [s.stp || '-', s.slm || '-', s.sts || '-', s.sas || '-'];
+              }),
+          student.summary.rta || '-',
+          student.attendance.s || '0',
+          student.attendance.i || '0',
+          student.attendance.tk || '0',
+          student.extracurricular.pramuka ? '✓' : '',
+          student.extracurricular.olahraga ? '✓' : '',
+          student.extracurricular.kesenian ? '✓' : '',
+          student.extracurricular.kerohanian ? '✓' : ''
+        ];
+        return row;
+      });
+      
+      // Tambahkan tabel ke PDF
+      doc.autoTable({
+        head: [headers],
+        body: data,
+        startY: 25,
+        styles: {
+          fontSize: 6,
+          cellPadding: 1
+        },
+        headStyles: {
+          fillColor: [44, 62, 80]
+        },
+        columnStyles: {
+          0: { cellWidth: 10 }, // No
+          1: { cellWidth: 30 }, // Nama
+          2: { cellWidth: 20 }  // NISN
+        }
+      });
+      
+      doc.save(`nilai-siswa-${new Date().toISOString().slice(0,10)}.pdf`);
+    }
+    
+    // Ekspor ke Excel
+    function exportToExcel() {
+      // Header
+      const headers = [
+        'No', 'Nama', 'NISN',
+        ...['Pendidikan Agama', 'Matematika', 'Bahasa Indonesia', 'IPAS', 'PPKN', 'PJOK', 
+            'Seni Tari', 'Seni Musik', 'Seni Rupa', 'Muatan Lokal', 'Bahasa Inggris']
+            .flatMap(subject => [`${subject} STP`, `${subject} SLM`, `${subject} STS`, `${subject} SAS`]),
+        'Rata-rata',
+        'Sakit', 'Izin', 'Tanpa Keterangan',
+        'Pramuka', 'Olahraga', 'Kesenian', 'Kerohanian'
+      ];
+      
+      // Data
+      const data = filteredData.map((student, index) => {
+        return [
+          index + 1,
+          student.name,
+          student.nisn,
+          ...['Pendidikan Agama dan Budi Pakerti', 'Matematika', 'Bahasa Indonesia', 'IPAS', 
+              'Pendidikan Pancasila', 'Pendidikan Jasmani Olahraga dan Kesehatan',
+              'Seni Tari', 'Seni Musik', 'Seni Rupa', 'Muatan Lokal', 'Bahasa Inggris']
+              .flatMap(subject => {
+                const s = student.subjects[subject] || {};
+                return [s.stp || '', s.slm || '', s.sts || '', s.sas || ''];
+              }),
+          student.summary.rta || '',
+          student.attendance.s || '',
+          student.attendance.i || '',
+          student.attendance.tk || '',
+          student.extracurricular.pramuka ? '✓' : '',
+          student.extracurricular.olahraga ? '✓' : '',
+          student.extracurricular.kesenian ? '✓' : '',
+          student.extracurricular.kerohanian ? '✓' : ''
+        ];
+      });
+      
+      // Buat workbook
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
+      XLSX.utils.book_append_sheet(wb, ws, "Nilai Siswa");
+      
+      // Ekspor
+      XLSX.writeFile(wb, `nilai-siswa-${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+  </script>
+</body>
+</html>
