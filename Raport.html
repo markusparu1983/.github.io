@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Siswa - Sistem Raport Digital</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- PDF Export Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <!-- Excel Export Library -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+  <!-- SweetAlert2 -->
+  <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- Include CSS File -->
+  <?!= include('css'); ?>
+</head>
+<body>
+  <!-- Include Sidebar -->
+  <?!= include('sidebar'); ?>
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <!-- Header Section -->
+    <header class="header fade-in">
+      <h4 id="content-title">Raport</h4>
+      <div class="user-info">
+        <img src="https://res.cloudinary.com/di10axon3/image/upload/v1747889808/DSC_4881_tnwbnj.jpg" 
+        alt="User Avatar" 
+        class="user-avatar" />
+        <div>
+          <div id="user-name">Memuat...</div>
+          <small id="user-role" class="text-muted">Memuat...</small>
+        </div>
+    </header>
+    <!-- Menu Container -->
+    <div class="menu-container no-print">
+      <div class="menu-title">Menu Administrasi Raport</div>
+      <div class="menu-buttons">
+        <button class="menu-button" onclick="runUpdateNamaMapel()">
+          <i class="fas fa-sync-alt"></i> Update Data & Pelajaran
+        </button>
+        <button class="menu-button" onclick="runUpdateNilaiDanDeskripsi()">
+          <i class="fas fa-edit"></i> Update Nilai & Deskripsi
+        </button>
+        <button class="menu-button" onclick="runUpdateCatatan()">
+          <i class="fas fa-comment"></i> Update Catatan Guru
+        </button>
+      </div>
+    </div>
+<div class="raport-container">
+    <div class="raport-title">
+    LAPORAN HASIL BELAJAR
+    <div class="title-line"></div>
+</div>
+
+<div class="d-flex align-items-center mb-4 gap-3 custom-margin">
+  <label for="studentDropdown" class="form-label fw-bold text-primary me-2">🎓</label>
+  <select id="studentDropdown" class="form-select shadow-sm w-auto" onchange="updateStudentInfo()">
+    <option value="" disabled selected>🔍 Pilih siswa...</option>
+  </select>
+  <button id="printButton" class="btn btn-outline-primary shadow-sm">
+    <i class="fas fa-print"></i> Cetak Rapor
+  </button>
+</div>
+
+<div class="student-info">
+    <div class="column">
+        <div class="info-item">
+            <div class="label">Nama Peserta Didik</div>
+            <div class="value">: <span id="namaSiswa">Andi Annidha Azwa Al-Qifrah</span></div>
+        </div>
+        <div class="info-item">
+            <div class="label">NIS/NISN</div>
+            <div class="value">: <span id="nisSiswa"></span></div>
+        </div>
+        <div class="info-item">
+            <div class="label">Nama Sekolah</div>
+            <div class="value">: <strong id="namaSekolah"></strong></div>
+        </div>
+        <div class="info-item">
+            <div class="label">Alamat</div>
+            <div class="value">: <span id="alamatSiswa"></span></div>
+         </div>
+       </div>
+
+        <div class="column column-right">
+            <div class="info-item">
+                <div class="label">Kelas</div>
+                <div class="value">: <span id="kelasSiswa"></span></div>
+            </div>
+            <div class="info-item">
+                <div class="label">Fase</div>
+                <div class="value">: <span id="faseSiswa"></span></div>
+            </div>
+            <div class="info-item">
+                <div class="label">Semester</div>
+                <div class="value">: <span id="semesterSiswa"></span></div>
+            </div>
+            <div class="info-item">
+                <div class="label">Tahun Pelajaran</div>
+                <div class="value">: <span id="tahunAjaran"></span></div>
+            </div>
+        </div>
+    </div>
+
+<table id="raportTable">
+    <thead>
+        <tr class="text-center">
+          <th style="width:50px">No.</th>
+          <th>Muatan Pelajaran</th>
+          <th style="width:80px">Nilai Akhir</th>
+          <th>Capaian Kompetensi</th>
+        </tr>
+      </thead>
+    <tbody id="capaianBody"></tbody>
+</table>
+
+<table id="ekstraTable" style="margin-top: 20px;">
+  <thead>
+    <tr class="text-center">
+      <th style="width:50px">No.</th>
+      <th>Ekstrakurikuler</th>
+      <th>Predikat</th>
+      <th>Keterangan</th>
+    </tr>
+  </thead>
+  <tbody id="ekstraBody">
+  </tbody>
+</table>
+
+<table id="presensiTable" style="margin-top: 20px;">
+  <thead>
+    <tr class="text-center">
+      <th style="width:50px">No.</th>
+      <th>Ketidakhadiran</th>
+      <th>Keterangan</th>
+    </tr>
+  </thead>
+  <tbody id="presensiBody">
+  </tbody>
+</table>
+
+<div id="catatan" style="display:none">
+  <p style="text-align:left"></p>
+</div>
+
+<div class="keputusan" id="keputusan" style="display:none">
+  <p>Berdasarkan dengan hasil yang telah dicapai pada semester 1 dan 2, Peserta Didik ditetapkan :</p>
+  <p>Naik ke kelas: <span id="naik"></span></p>
+  <p>Tinggal di kelas : <span id="tinggal"></span></p>
+</div>
+
+<div style="margin-top: 50px; display: flex; justify-content: space-between; display:none">
+    <div style="text-align: left;">
+        <p>Mengetahui,<br>Orang Tua/Wali Murid</p>
+        <br><br>
+        <p>..........................................</p>
+    </div>
+    <div style="text-align: left; width: 250px; display: flex; flex-direction: column; align-items: flex-end; display:none">
+        <p style="margin-right: 12px;">
+            <span id="waliKelasTanggal"></span><br>
+        </p>
+        <br><br>
+        <p style="margin-right: 12px">
+            <span id="waliKelasNama"></span><br>
+            <span id="nipGuru"></span>
+        </p>
+    </div>
+</div>
+
+<div style="text-align: center; margin-top: 50px; display:none">
+    <p>Mengetahui,<br>Kepala SD NEGERI 001 BABULU</p>
+    <br><br>
+    <p><span id="kepalaSekolah"></span><br><span id="nipKepsek"></span></p>
+</div>
+</div>
+
+<script>
+  function loadIdentitas() {
+  google.script.run.withSuccessHandler(displayInfoData).getIdentitas();
+}
+
+function displayInfoData(data) {
+  document.getElementById('namaSekolah').textContent = data.sekolah || "-";
+  document.getElementById('alamatSiswa').textContent = data.alamat || "-";
+  document.getElementById('kelasSiswa').textContent = data.kelas || "-";
+  document.getElementById('faseSiswa').textContent = data.fase || "-";
+  document.getElementById('semesterSiswa').textContent = data.semester || "-";
+  document.getElementById('tahunAjaran').textContent = data.tahun || "-";
+}
+
+function loadStudents() {
+  google.script.run.withSuccessHandler(populateDropdown).getStudentList();
+}
+
+function populateDropdown(students) {
+  const dropdown = document.getElementById('studentDropdown');
+  dropdown.innerHTML = '<option value="">🔍 Pilih Siswa...</option>';
+  students.forEach((student, index) => {
+    const option = document.createElement('option');
+    option.value = index;
+    option.textContent = student.nama;
+    dropdown.appendChild(option);
+  });
+  window.students = students;
+}
+
+function updateStudentInfo() {
+  const dropdown = document.getElementById('studentDropdown');
+  const selectedIndex = dropdown.value;
+  if (selectedIndex !== "") {
+    const selectedStudent = window.students[selectedIndex];
+    document.getElementById('namaSiswa').textContent = selectedStudent.nama;
+    document.getElementById('nisSiswa').textContent = selectedStudent.nis;
+
+    google.script.run.withSuccessHandler(renderTable).getCapaianKompetensi(selectedStudent.nama);
+    google.script.run.withSuccessHandler(renderEkstraTable).getEkstraData(selectedStudent.nama);
+    google.script.run.withSuccessHandler(renderPresensiTable).getPresensiData(selectedStudent.nama);
+    google.script.run.withSuccessHandler(updateCatatan).getCatatanSiswa(selectedStudent.nama);
+    google.script.run.withSuccessHandler(updateKeputusan).getKeputusanSiswa(selectedStudent.nama);
+
+  } else {
+    document.getElementById('namaSiswa').textContent = "-";
+    document.getElementById('nisSiswa').textContent = "-";
+    clearTable();
+    clearEkstraTable();
+    clearPresensiTable();
+    clearCatatan();
+    clearKeputusan();
+  }
+}
+
+function updateCatatan(catatan) {
+  document.getElementById('catatan').innerHTML = `<p style="text-align:left">${catatan}</p>`;
+}
+
+function clearCatatan() {
+  document.getElementById('catatan').innerHTML = '<p style="text-align:left">-</p>';
+}
+
+function updateKeputusan(data) {
+  document.getElementById('naik').textContent = data.naik;
+  document.getElementById('tinggal').textContent = data.tinggal;
+}
+
+function clearKeputusan() {
+  document.getElementById('naik').textContent = "-";
+  document.getElementById('tinggal').textContent = "-";
+}
+
+function fetchStudentData() {
+  google.script.run.withSuccessHandler(displayStudentData).getStudentData();
+}
+
+function displayStudentData(data) {
+  document.getElementById('namaSiswa').textContent = data.nama;
+  document.getElementById('nisSiswa').textContent = data.nis;
+}
+
+window.onload = function() {
+  fetchStudentData();
+  loadIdentitas();
+  loadStudents();
+};
+
+function fetchLegalitasData() {
+  google.script.run.withSuccessHandler(displayLegalitasData).getLegalitasData();
+}
+
+function displayLegalitasData(data) {
+document.getElementById('waliKelasTanggal').innerHTML = `${data.tempatTanggal}<br>Wali Kelas`;
+document.getElementById('waliKelasNama').innerHTML = `<strong>${data.namaGuru}</strong><br>NIP. <span>${data.nipGuru}</span>`;
+document.getElementById('kepalaSekolah').innerHTML = `<strong>${data.kepalaSekolah}</strong><br>NIP. <span>${data.nipKepalaSekolah}</span>`;
+document.querySelectorAll('p').forEach(p => {
+    if (p.style.display === "none") {
+      p.style.display = "block";
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  google.script.run.withSuccessHandler(renderTable).getCapaianKompetensi();
+});
+
+function renderTable(data) {
+  const tableBody = document.getElementById('capaianBody');
+  tableBody.innerHTML = '';
+  data.forEach(item => {
+    const row = `
+      <tr>
+        <td rowspan="2">${item.id}</td>
+        <td rowspan="2">${item.mapel}</td>
+        <td rowspan="2" style="text-align:center">${item.nilai}</td>
+        <td style="text-align:justify;" class="capaian-kompetensi good">${item.good}</td>
+      </tr>
+      <tr>
+        <td style="text-align:justify;" class="capaian-kompetensi less">${item.less}</td>
+      </tr>`;
+    tableBody.innerHTML += row;
+  });
+}
+
+function renderEkstraTable(data) {
+  const ekstraBody = document.getElementById('ekstraBody');
+  ekstraBody.innerHTML = '';
+  data.forEach(item => {
+    const row = `
+      <tr>
+        <td class="text-center">${item.no}</td>
+        <td>${item.ekstra}</td>
+        <td>${item.predikat}</td> 
+        <td>${item.keterangan}</td>
+      </tr>`;
+    ekstraBody.innerHTML += row;
+  });
+}
+
+function renderPresensiTable(data) {
+  const tableBody = document.getElementById('presensiBody');
+  tableBody.innerHTML = '';
+  if (data.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="3" class="text-center">Tidak ada data presensi.</td>
+      </tr>`;
+    return;
+  }
+  data.forEach(item => {
+    const row = `
+      <tr>
+        <td class="text-center">${item.no}</td>
+        <td>${item.ketidakhadiran}</td>
+        <td class="text-center">${item.keterangan}</td>
+      </tr>`;
+    tableBody.innerHTML += row;
+  });
+}
+
+function clearTables() {
+  const emptyRow = `
+    <tr>
+      <td colspan="4" class="text-center">Silakan pilih siswa.</td>
+    </tr>`;
+  document.getElementById('ekstraBody').innerHTML = emptyRow; 
+  document.getElementById('capaianBody').innerHTML = emptyRow;
+  document.getElementById('presensiBody').innerHTML = emptyRow;
+}
+  // Fungsi untuk Update Data & Pelajaran
+  function runUpdateNamaMapel() {
+    const loading = showLoading('Memperbarui data dan pelajaran...');
+    
+    google.script.run
+      .withSuccessHandler(() => {
+        loading.close();
+        showSuccess('Data dan pelajaran berhasil diperbarui!');
+        // Refresh data setelah update
+        updateStudentInfo();
+      })
+      .withFailureHandler((error) => {
+        loading.close();
+        showError('Gagal memperbarui data: ' + error.message);
+      })
+      .updateNamaMapel();
+  }
+
+  // Fungsi untuk Update Nilai & Deskripsi (diperbaiki)
+function runUpdateNilaiDanDeskripsi() {
+    const selectedStudent = getSelectedStudent();
+    if (!selectedStudent) return;
+
+    const loading = showLoading('Memperbarui nilai dan deskripsi...');
+    
+    google.script.run
+      .withSuccessHandler(() => {
+        loading.close();
+        showSuccess('Nilai dan deskripsi berhasil diperbarui!');
+        // Refresh data yang benar setelah update
+        google.script.run.withSuccessHandler(renderTable)
+          .getCapaianKompetensi(selectedStudent.nama);
+      })
+      .withFailureHandler((error) => {
+        loading.close();
+        showError('Gagal memperbarui nilai: ' + error.message);
+      })
+      .updateNilaiDanDeskripsi(selectedStudent.nama);
+}
+
+  // Fungsi untuk Update Catatan Guru (diperbaiki)
+function runUpdateCatatan() {
+    const selectedStudent = getSelectedStudent();
+    if (!selectedStudent) return;
+
+    const loading = showLoading('Memperbarui catatan guru...');
+    
+    google.script.run
+      .withSuccessHandler(() => {
+        loading.close();
+        showSuccess('Catatan guru berhasil diperbarui!');
+        // Refresh data yang benar setelah update
+        google.script.run.withSuccessHandler(updateCatatan)
+          .getCatatanSiswa(selectedStudent.nama);
+      })
+      .withFailureHandler((error) => {
+        loading.close();
+        showError('Gagal memperbarui catatan: ' + error.message);
+      })
+      .updateCatatanGuru(selectedStudent.nama);
+}
+
+  // Helper function untuk mendapatkan siswa yang dipilih
+  function getSelectedStudent() {
+    const dropdown = document.getElementById('studentDropdown');
+    const selectedIndex = dropdown.value;
+    
+    if (selectedIndex === "" || !window.students) {
+      showError('Silakan pilih siswa terlebih dahulu');
+      return null;
+    }
+    
+    return window.students[selectedIndex];
+  }
+
+  // Fungsi untuk menampilkan loading
+  function showLoading(message) {
+    return Swal.fire({
+      title: 'Harap tunggu',
+      html: message,
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  }
+
+  // Fungsi untuk menampilkan pesan sukses
+  function showSuccess(message) {
+    Swal.fire({
+      icon: 'success',
+      title: 'Berhasil',
+      text: message,
+      timer: 2000,
+      showConfirmButton: false
+    });
+  }
+
+  // Fungsi untuk menampilkan pesan error
+  function showError(message) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Terjadi Kesalahan',
+      text: message
+    });
+    function logout() {
+      if (confirm('Anda yakin ingin keluar dari sistem?')) {
+        goToPage('login');
+      }
+    }
+  }
+</script>
+ <?!= HtmlService.createHtmlOutputFromFile('pdf-js').getContent(); ?>
+ 
+</body>
+</html>
