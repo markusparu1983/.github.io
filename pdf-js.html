@@ -1,0 +1,299 @@
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    google.script.run.withSuccessHandler(initializePDF).getLegalitasData();
+    function initializePDF(legalitasData) {
+        document.getElementById('printButton').addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'pt', 'legal');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(15);
+            doc.text('LAPORAN HASIL BELAJAR', 200, 40);
+            doc.setLineWidth(1);
+            doc.line(20, 55, 590, 55);
+
+            function toProperCase(text) {
+    const exceptions = ['SD', 'SMP', 'SMA', 'SMK', 'MI', 'MTs', 'MA', 'MAN', 'TK', 'PAUD'];
+    return text.split(' ').map(word => {
+        const upper = word.toUpperCase();
+        if (exceptions.includes(upper)) return upper;
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    }).join(' ');
+}
+
+let startY = 78;
+const namaSiswa = document.getElementById('namaSiswa').textContent.toUpperCase();
+const nisnSiswa = document.getElementById('nisSiswa').textContent;
+const namaSekolahRaw = document.getElementById('namaSekolah').textContent.trim();
+const namaSekolah = toProperCase(namaSekolahRaw);
+const footerText = `${namaSiswa} | ${nisnSiswa}`;
+
+            const studentInfo = [
+                ['Nama Peserta Didik', namaSiswa],
+                ['NIS/NISN', nisnSiswa],
+                ['Nama Sekolah', namaSekolah],
+                ['Alamat', document.getElementById('alamatSiswa').textContent],
+                ['Kelas', document.getElementById('kelasSiswa').textContent],
+                ['Fase', document.getElementById('faseSiswa').textContent],
+                ['Semester', document.getElementById('semesterSiswa').textContent],
+                ['Tahun Pelajaran', document.getElementById('tahunAjaran').textContent]
+            ];
+
+            const leftColumn = studentInfo.slice(0, 4);
+            const rightColumn = studentInfo.slice(4, 8);
+
+            function renderInfoTable(data, x, y) {
+                data.forEach((item, index) => {
+                    const labelWidth = 110;
+                    const separator = ' : ';
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(11);
+                    doc.text(item[0], x, y + (index * 18));
+                    doc.text(separator, x + labelWidth, y + (index * 18));
+                    const isBoldAndUppercase = item[0] === 'Nama Peserta Didik' || item[0] === 'Nama Sekolah';
+                    doc.setFont('helvetica', isBoldAndUppercase ? 'bold' : 'normal');
+                    doc.text(item[1], x + labelWidth + 10, y + (index * 18));
+                });
+            }
+
+            renderInfoTable(leftColumn, 25, startY);
+            renderInfoTable(rightColumn, 410, startY);
+            const lineY = startY + (leftColumn.length * 15) + 10;
+            doc.setLineWidth(0.5); 
+            doc.line(20, lineY, 590, lineY);
+
+            let currentY = startY + Math.max(leftColumn.length, rightColumn.length) * 18;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.text('A. NILAI DAN KETERCAPAIAN KOMPETENSI', 20, currentY + 20);
+            currentY += 36;
+
+           doc.autoTable({
+            html: '#raportTable',
+            startY: currentY - 3,
+            theme: 'grid',
+            margin: { left: 20 },
+            headStyles: {
+                fillColor: [120, 200, 130],
+                fontSize: 11,
+                whiteSpace: 'nowrap',
+                halign: 'center'
+            },
+            styles: {
+                fontSize: 11,
+                cellPadding: 4,
+                valign: 'middle',
+                textColor: [30, 30, 30]
+            },
+            columnStyles: {
+                0: { cellWidth: 30, halign: 'center' },
+                1: { cellWidth: 130, halign: 'left' },
+                2: { cellWidth: 80, halign: 'center' },
+                3: { cellWidth: 330, halign: 'left', overflow: 'linebreak' }
+            },
+             didDrawPage: function (data) {
+                currentY = data.cursor.y;
+             }
+          });
+
+            currentY += 30;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.text('B. KEGIATAN EKSTRAKURIKULER', 20, currentY);
+            currentY += 13;
+
+              doc.autoTable({
+                  html: '#ekstraTable',
+                  startY: currentY,
+                  theme: 'grid',
+                  margin: { left: 20, right: 20 },
+                  tableWidth: 'auto',
+                  pageBreak: 'auto',
+                  headStyles: {
+                      fillColor: [120, 200, 130],
+                      fontSize: 11,
+                      whiteSpace: 'nowrap',
+                      halign: 'center'
+                  },
+                  styles: {
+                      fontSize: 11,
+                      cellPadding: 4,
+                      valign: 'middle',
+                      halign: 'left',
+                      overflow: 'linebreak',
+                      textColor: [30, 30, 30]
+                  },
+                  columnStyles: {
+                      0: { cellWidth: 30, halign: 'center' },
+                      1: { cellWidth: 130, halign: 'left' },
+                      2: { cellWidth: 80, halign: 'center', headAlign: 'center' },
+                      3: { cellWidth: 330, halign: 'left' }
+                  },
+                  didDrawPage: function (data) {
+                      currentY = data.cursor.y;
+                  }
+              });
+
+            currentY += 30;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.text('C. KETIDAKHADIRAN', 20, currentY);
+            currentY += 13;
+
+              doc.autoTable({
+                  html: '#presensiTable',
+                  startY: currentY,
+                  theme: 'grid',
+                  margin: { left: 20, right: 20 },
+                  tableWidth: 'auto',
+                  pageBreak: 'auto',
+                  headStyles: {
+                      fillColor: [120, 200, 130],
+                      fontSize: 11,
+                      whiteSpace: 'nowrap',
+                      halign: 'center'
+                  },
+                  styles: {
+                      fontSize: 11,
+                      cellPadding: 4,
+                      valign: 'middle',
+                      halign: 'left',
+                      overflow: 'linebreak',
+                      textColor: [30, 30, 30]
+                  },
+                  columnStyles: {
+                      0: { cellWidth: 30, halign: 'center' },
+                      1: { cellWidth: 130, halign: 'left' },
+                      2: { cellWidth: 80, halign: 'center', headAlign: 'center' }
+                  },
+                  didDrawPage: function (data) {
+                      currentY = data.cursor.y;
+                  }
+              });
+
+          currentY += 30;
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(12);
+          doc.text('D. CATATAN WALI KELAS', 20, currentY);
+          currentY += 20;
+          const catatanGuru = document.getElementById('catatan').textContent;
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(11);
+
+          const maxWidth = 575;
+          const marginLeft = 20;
+
+          function drawJustifiedText(doc, text, x, y, maxWidth, lineHeight) {
+              const words = text.split(' ');
+              let line = '';
+              let lines = [];
+              words.forEach((word) => {
+                  const testLine = line + word + ' ';
+                  const testWidth = doc.getTextWidth(testLine);
+                  if (testWidth > maxWidth) {
+                      lines.push(line.trim());
+                      line = word + ' ';
+                  } else {
+                      line = testLine;
+                  }
+              });
+              lines.push(line.trim());
+              lines.forEach((line, i) => {
+                  if (i === lines.length - 1 || line.indexOf(' ') === -1) {
+                      doc.text(line, x, y);
+                  } else {
+                      const wordsInLine = line.split(' ');
+                      const spaceCount = wordsInLine.length - 1;
+                      const totalWidth = doc.getTextWidth(line);
+                      const extraSpace = (maxWidth - totalWidth) / spaceCount;
+                      let currentX = x;
+                      wordsInLine.forEach((word, index) => {
+                          doc.text(word, currentX, y);
+                          currentX += doc.getTextWidth(word) + extraSpace;
+                      });
+                  }
+                  y += lineHeight;
+              });
+              return y; 
+          }
+        currentY = drawJustifiedText(doc, catatanGuru, marginLeft, currentY, maxWidth, 12);
+
+        const semesterSiswa = document.getElementById('semesterSiswa').innerText.trim();
+        if (semesterSiswa.includes('2')) {
+            const keputusanText = document.getElementById('keputusan').innerText.trim();
+            currentY += 15;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.text('E. KEPUTUSAN', 20, currentY);
+            currentY += 20;
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(11);
+
+            const keputusanContent = `
+            Berdasarkan dengan hasil yang telah dicapai pada semester 1 dan 2, Peserta Didik ditetapkan :`;
+            currentY = drawJustifiedText(doc, keputusanContent, marginLeft, currentY, maxWidth, 12);
+            const lineHeight = 12;
+
+            const naikText = document.getElementById('naik').innerText.trim();
+            const tinggalText = document.getElementById('tinggal').innerText.trim();
+
+            doc.text('Naik ke kelas :', marginLeft, currentY);
+            doc.setFont('helvetica', 'bold');
+            doc.text(naikText || '-', marginLeft + 76, currentY);
+            doc.setFont('helvetica', 'normal');
+            currentY += lineHeight;
+
+            doc.text('Tinggal di kelas :', marginLeft, currentY);
+            doc.setFont('helvetica', 'bold');
+            doc.text(tinggalText || '-', marginLeft + 86, currentY);
+            doc.setFont('helvetica', 'normal');
+            currentY += lineHeight;
+        }
+
+        const pageCountAfter = doc.internal.getNumberOfPages();
+            doc.setPage(pageCountAfter);
+
+            let signatureY = currentY + 30;
+            doc.setFont('helvetica', 'normal');
+
+            doc.setFontSize(11);
+            doc.text('Mengetahui,', 35, signatureY);
+            doc.text('Orang Tua/Wali Murid', 35, signatureY + 15);
+            doc.text('..........................................', 35, signatureY + 85);
+
+            doc.text(legalitasData.tempatTanggal, 400, signatureY);
+            doc.text('Wali Kelas', 400, signatureY + 15);
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(11);
+            doc.text(legalitasData.namaGuru, 400, signatureY + 80);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(11);
+            doc.text(`NIP. ${legalitasData.nipGuru}`, 400, signatureY + 95);
+
+            function centerText(doc, text, y, isBold = false, fontSize = 11, offsetX = 0) {
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const textWidth = doc.getTextWidth(text);
+            const x = (pageWidth - textWidth) / 2 - offsetX; 
+            doc.setFont('helvetica', isBold ? 'bold' : 'normal');
+            doc.setFontSize(fontSize);
+            doc.text(text, x, y);
+         }
+
+          centerText(doc, 'Mengetahui,', signatureY + 145, false, 11, 20);
+          centerText(doc, `Kepala ${namaSekolah}`, signatureY + 160, false, 11, 20);
+          centerText(doc, legalitasData.kepalaSekolah, signatureY + 230, true, 11, 20);
+          centerText(doc, `NIP. ${legalitasData.nipKepalaSekolah}`, signatureY + 245, false, 11, 20);
+
+          for (let i = 1; i <= pageCountAfter; i++) {
+              doc.setPage(i);
+              doc.setFontSize(10);
+              doc.text(footerText, 20, doc.internal.pageSize.getHeight() - 30);
+              doc.text(`Halaman ${i}`, doc.internal.pageSize.getWidth() - 70, doc.internal.pageSize.getHeight() - 30);
+            }
+            const pdfUrl = doc.output('bloburl');
+            window.open(pdfUrl, '_blank');
+        });
+    }
+});
+</script>
